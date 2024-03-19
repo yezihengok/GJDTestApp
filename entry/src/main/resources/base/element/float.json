@@ -1,0 +1,117 @@
+{
+  "float": [
+    {
+      "name": "copy_right_image_width",
+      "value": "24vp"
+    },
+    {
+      "name": "advertise_button_width",
+      "value": "28vp"
+    },
+    {
+      "name": "advertise_button_height",
+      "value": "16vp"
+    },
+    {
+      "name": "skip_text_width",
+      "value": "72vp"
+    },
+    {
+      "name": "skip_text_height",
+      "value": "28vp"
+    },
+    {
+      "name": "copyrightArea_title_text_size",
+      "value": "18fp"
+    },
+    {
+      "name": "hello_world_font_size",
+      "value": "50fp"
+    },
+    {
+      "name": "skip_text_size",
+      "value": "15fp"
+    },
+    {
+      "name": "copyright_description_text_size",
+      "value": "9fp"
+    },
+    {
+      "name": "copy_right_area_height",
+      "value": "100vp"
+    },
+    {
+      "name": "skip_text_margin_right",
+      "value": "16vp"
+    },
+    {
+      "name": "skip_text_margin_top",
+      "value": "12vp"
+    },
+    {
+      "name": "copyright_title_margin_left",
+      "value": "8vp"
+    },
+    {
+      "name": "copyright_description_margin_top",
+      "value": "8vp"
+    },
+    {
+      "name": "advertise_icon_margin",
+      "value": "16vp"
+    },
+    {
+      "name": "vp_one",
+      "value": "1vp"
+    },
+    {
+      "name": "vp_two",
+      "value": "2vp"
+    },
+    {
+      "name": "vp_four",
+      "value": "4vp"
+    },
+    {
+      "name": "vp_six",
+      "value": "6vp"
+    },
+    {
+      "name": "vp_eight",
+      "value": "8vp"
+    },
+    {
+      "name": "vp_ten",
+      "value": "10vp"
+    },
+    {
+      "name": "vp_twelve",
+      "value": "12vp"
+    },
+    {
+      "name": "vp_fourteen",
+      "value": "14vp"
+    },
+    {
+      "name": "vp_sixteen",
+      "value": "16vp"
+    },
+    {
+      "name": "vp_eighteen",
+      "value": "18vp"
+    },
+    {
+      "name": "vp_twenty",
+      "value": "20vp"
+    },
+    {
+      "name": "vp_twenty_four",
+      "value": "24vp"
+    },
+    {
+      "name": "vp_component_left_right",
+      "value": "15vp"
+    }
+
+  ]
+}
