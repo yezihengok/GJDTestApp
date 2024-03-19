@@ -2,6 +2,7 @@
 
 import { indexTabInfo, TabModel } from '../../data/HomeTabData';
 import { IndexDynamicsComponent } from './IndexDynamicsComponent';
+import { RecommendComponent } from './RecommendComponent';
 
 /**
  * 首页推荐关注等tab
@@ -43,7 +44,7 @@ export struct IndexMainTab {
     Column(){
       Tabs({controller:this.tabsController}){
         TabContent(){
-          Text('0').height('10%')
+          RecommendComponent()
         }.tabBar(this.TabBuilders(indexTabInfo[0]))
 
         TabContent(){

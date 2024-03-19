@@ -89,20 +89,20 @@ export struct IndexDynamicsComponent {
             scroller: this.scroller,
             refreshConfigurator: this.refreshConfig,
             customList: this.ListViewBuilder,
-            onRefresh: () => {
-              return new Promise<string>((resolve, reject) => {
-                this.loadDataByPage(0).then(
-                  (data) => {
-                    //this.nextPage = 1;
-                    this.data = data;
-                    resolve('刷新成功');
-                  },
-                  (error) => {
-                    resolve('刷新失败');
-                  }
-                )
-              });
-            },
+            // onRefresh: () => {
+            //   return new Promise<string>((resolve, reject) => {
+            //     this.loadDataByPage(0).then(
+            //       (data) => {
+            //         //this.nextPage = 1;
+            //         this.data = data;
+            //         resolve('刷新成功');
+            //       },
+            //       (error) => {
+            //         resolve('刷新失败');
+            //       }
+            //     )
+            //   });
+            // },
             onLoadMore: () => {
               return new Promise<string>((resolve, reject) => {
                 if (this.hasMore) {
