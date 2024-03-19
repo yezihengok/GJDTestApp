@@ -21,4 +21,11 @@ export class CircleInfo {
    likeCount:number; //点赞数
    circleIntro: string;//圈子简介
    latestPublishTime:number;//最近发布时间
+
+  constructor(followCount: number,liveStatus: number, circleName: string, followFlag: boolean) {
+    this.followCount = followCount;
+    this.liveStatus = liveStatus;
+    this.circleName = circleName;
+    this.followFlag = followFlag;
+  }
 }
