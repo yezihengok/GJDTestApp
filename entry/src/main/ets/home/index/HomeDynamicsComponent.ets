@@ -7,7 +7,8 @@ import { MarketNewType } from '../../common/constants/CommEnum';
 import { DateUtil } from '../../common/constants/DateUtil';
 import Logger from '../../common/utils/Logger';
 import { toast } from '../../common/utils/Toast';
-import { CommonUtil } from '../../common/constants/CommonUtil';
+import { CommonUtil } from '../../common/utils/CommonUtil';
+import { TypeDynamics1, TypeDynamics2 } from '../../data/HomeDataType';
 
 /**
  * 动态
@@ -17,10 +18,11 @@ export struct IndexDynamicsComponent {
   private TAG = "IndexDynamicsComponent"
   private scroller: Scroller = new Scroller();
   private refreshConfig = new PullToRefreshConfigurator();
-  @State loadState: LoadState = LoadState.LOADING;
-  @State data: Array<MarketNew> = []
+
+  @State data: Array<Object> = []
   private lastTimestamp: number = 0;
   private hasMore: boolean = true;
+  @State loadState: LoadState = LoadState.LOADING;
   @State showLoading: boolean = false;
 
   aboutToAppear() {
@@ -33,14 +35,21 @@ export struct IndexDynamicsComponent {
 
   private loadData() {
     this.loadState = LoadState.LOADING
-    this.loadDataByPage(0).then(
-      (data) => {
-        this.data = data;
-        if (this.data.length === 0) {
+    this.loadDataByPage(0).then((data) => {
+
+        // this.data = data;
+        if (data.length === 0) {
           this.loadState = LoadState.EMPTY;
+          this.data = null
         } else {
           this.loadState = LoadState.SUCCESS;
-
+          data.forEach(element => {
+            if (element.type === 1) {
+              this.data.push(new TypeDynamics1(element))
+            } else {
+              this.data.push(new TypeDynamics2(element))
+            }
+          });
         }
       },
       (error) => {
@@ -110,10 +119,22 @@ export struct IndexDynamicsComponent {
                     (data) => {
                       if (data.length > 0) {
 
-                        this.data = this.data.concat(data);
+                        //this.data = this.data.concat(data);
+                        data.forEach(element => {
+                          if (element.type === 1) {
+                            this.data.push(new TypeDynamics1(element))
+                          } else {
+                            this.data.push(new TypeDynamics2(element))
+                          }
+                        });
 
-                        let marketNew: MarketNew = this.data[this.data.length-1];
-                        this.lastTimestamp = DateUtil.dateToStamp(marketNew.publishTime);
+                        let item = this.data[this.data.length-1];
+                      if (item instanceof TypeDynamics1) {
+                        this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
+                      }else if (item instanceof TypeDynamics2) {
+                        this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
+                      }
+
                         resolve('加载成功');
                       } else {
                         this.hasMore = false;
@@ -146,17 +167,17 @@ export struct IndexDynamicsComponent {
       ForEach(this.data, (item: MarketNew) => {
         ListItem() {
 
-         // if(this.dataBean!=null &&this.dataBean==undefined) {
-
-            if (item.type===1) {
-              MarketNewItemBuilder1({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
-                toast(JSON.stringify(marketNew))
-              } })
-            }else{
-              MarketNewItemBuilder2({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
-                toast(JSON.stringify(marketNew))
-              } })
-            }
+          // if(this.dataBean!=null &&this.dataBean==undefined) {
+          //   if (item.type===1) {
+          if (item instanceof TypeDynamics1) {
+            MarketNewItemBuilder1({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
+              toast(`marketNew.type:${marketNew.type}`)
+            } })
+          } else if (item instanceof TypeDynamics2) {
+            MarketNewItemBuilder2({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
+              toast(`marketNew.type:${marketNew.type}`)
+            } })
+          }
 
           //}
 
@@ -190,18 +211,18 @@ export struct IndexDynamicsComponent {
  */
 @Component
 struct MarketNewItemBuilder1 {
-  dataBean: MarketNew=new MarketNew();
+  dataBean: TypeDynamics1;
   onItemClick: (MarketNew) => void;
 
   build() {
     Column() {
-      Text(this.dataBean.summary).maxLines(3).fontSize(14)
+      Text(this.dataBean.marketNew.summary).maxLines(3).fontSize(14)
         .fontColor($r('app.color.up_common_text_primary_color'))
         .textOverflow({ overflow: TextOverflow.Ellipsis })
 
       Flex({ direction: FlexDirection.Row, wrap: FlexWrap.NoWrap }) {
-        if (MarketNew.getPicList(this.dataBean).length > 0) {
-          ForEach(MarketNew.getPicList(this.dataBean), (item: string, index) => {
+        if (MarketNew.getPicList(this.dataBean.marketNew).length > 0) {
+          ForEach(MarketNew.getPicList(this.dataBean.marketNew), (item: string, index) => {
             //多个将会平分显示
             if (index > 0) {
               Image(item)
@@ -221,11 +242,12 @@ struct MarketNewItemBuilder1 {
           }, item => JSON.stringify(item))
         }
       }
-      TagTimeLayout(this.dataBean.secondCategoryName,this.dataBean.publishTime)
-    }.height(MarketNew.getPicList(this.dataBean).length > 0?180:110)
+
+      TagTimeLayout(this.dataBean.marketNew.secondCategoryName, this.dataBean.marketNew.publishTime)
+    }.height(MarketNew.getPicList(this.dataBean.marketNew).length > 0 ? 180 : 110)
     .justifyContent(FlexAlign.Center)
-    .onClick(()=>{
-      this.onItemClick(this.dataBean);
+    .onClick(() => {
+      this.onItemClick(this.dataBean.marketNew);
     })
 
   }
@@ -236,41 +258,41 @@ struct MarketNewItemBuilder1 {
  */
 @Component
 struct MarketNewItemBuilder2 {
-  dataBean: MarketNew=new MarketNew();
+  dataBean: TypeDynamics2;
   onItemClick: (MarketNew) => void;
 
   build() {
     Row() {
       Column() {
-        Text(this.dataBean.title)
+        Text(this.dataBean.marketNew.title)
           .width('100%')
           .fontSize(15)
           .fontWeight(FontWeight.Bold)
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-        Text(this.dataBean.summary)
+        Text(this.dataBean.marketNew.summary)
           .fontSize(13)
           .width('100%')
           .fontColor('#657180')
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: 5 })
-        TagTimeLayout(this.dataBean.secondCategoryName,this.dataBean.publishTime)
+        TagTimeLayout(this.dataBean.marketNew.secondCategoryName, this.dataBean.marketNew.publishTime)
       }
-      .layoutWeight(CommonUtil.isEmpty(this.dataBean.title)?1:0)
+      .layoutWeight(1)
 
-      Image(this.dataBean.coverImage)
+      Image(this.dataBean.marketNew.coverImage)
         .width(100)
         .height(70)
         .margin({ top: 15, bottom: 15, left: 5 })
         .objectFit(ImageFit.Cover)
         .id('coverImg')
         .borderRadius(5)
-        .visibility(CommonUtil.isEmpty(this.dataBean.coverImage)?Visibility.None:Visibility.Visible)
+        .visibility(CommonUtil.isEmpty(this.dataBean.marketNew.coverImage) ? Visibility.None : Visibility.Visible)
 
-    }.padding({top:10,bottom:10})
-    .width('100%').height(110).onClick(()=>{
-      this.onItemClick(this.dataBean);
+    }.padding({ top: 10, bottom: 10 })
+    .width('100%').height(110).onClick(() => {
+      this.onItemClick(this.dataBean.marketNew);
     })
   }
 }

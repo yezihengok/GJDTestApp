@@ -6,7 +6,7 @@ import BannerBuilder from '../view/BannerBuilder';
 import { PullToRefresh, PullToRefreshConfigurator } from '@ohos/pulltorefresh'
 import { FunctionData, MFunction } from '../common/net/model/FunctionData';
 import { Config } from '../common/constants/Config';
-import { CommonUtil } from '../common/constants/CommonUtil';
+import { CommonUtil } from '../common/utils/CommonUtil';
 import FunctionBuilder from '../view/FunctionBuilder';
 import { ContentArticle } from '../common/net/model/ContentArticle';
 import { ContentListReq } from '../common/net/model/Request';
@@ -36,7 +36,7 @@ export struct HomeComponent {
   async refreshData(): Promise<Array<Object>> {
     return new Promise<Array<Object>>(async (resolve, reject) => {
       //获取功能区
-      let fucRsp = await Api.get().getFunction('gjd_sy_jgq');
+      let fucRsp = await Api.get().getFunctionData('gjd_sy_jgq');
       let data = fucRsp.data;
       if (fucRsp.isSuccess()) {
         //处理数据 10个分一组，最多分2组
@@ -195,15 +195,14 @@ export struct HomeComponent {
       ForEach(this.data, (item: object, index) => {
         ListItem() {
           if (item instanceof TypeJGQ) {
-            FunctionBuilder({ data: item })
+            FunctionBuilder({ data: item }).margin({ left: $r('app.float.vp_component_left_right'), right: $r('app.float.vp_component_left_right') })
           } else if (item instanceof TypeJRKB) {
-            KanBoard()
+            KanBoard().margin({ left: 15, right: 15 })
           }
           else if (item instanceof TypeBanner) {
-            BannerBuilder({ data: item })
+            BannerBuilder({ data: item }).margin({ left: 15, right: 15 })
           } else if (item instanceof TypeSCJJ) {
-            //$数据 初始化@Link
-            SCJJSwiper({ data: item })
+            SCJJSwiper({ data: item }).margin({ left: 15, right: 15 })
           } else if (item instanceof TypeIndexTab) {
             IndexMainTab({ refreshConfig: this.refreshConfigurator }).margin({ top: 10 })
 
@@ -257,7 +256,7 @@ export struct HomeComponent {
 
               })
 
-            }.margin({ top: 5, bottom: 10 })
+            }.margin({ top: 5, bottom: 10,left:15,right:15 })
             .width('100%')
 
             /*  if (this.functionSuccess) {
@@ -309,7 +308,7 @@ export struct HomeComponent {
               customRefresh: null,
             })
 
-          }.padding({ left: $r('app.float.vp_component_left_right'), right: $r('app.float.vp_component_left_right') })
+          }
         }.width('100%')
 
       }.height('100%')

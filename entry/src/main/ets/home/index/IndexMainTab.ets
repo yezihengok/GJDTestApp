@@ -1,7 +1,8 @@
 
 
 import { indexTabInfo, TabModel } from '../../data/HomeTabData';
-import { IndexDynamicsComponent } from './IndexDynamicsComponent';
+import { IndexDynamicsComponent } from './HomeDynamicsComponent';
+import { HomeStrategyComponent } from './HomeStrategyComponent';
 import { RecommendComponent } from './RecommendComponent';
 
 /**
@@ -20,7 +21,6 @@ export struct IndexMainTab {
     Column() {
 
       Text(info.title)
-        .fontSize(15)
         .fontSize(this.currentIndex === info.index ?17:14)
         .fontWeight(this.currentIndex === info.index ?FontWeight.Medium:FontWeight.Normal)
         .fontColor(this.currentIndex === info.index ? '#000000' : '#6B6B6B')
@@ -52,7 +52,8 @@ export struct IndexMainTab {
         }.tabBar(this.TabBuilders(indexTabInfo[1]))
 
         TabContent(){
-          Text('2').height('10%')
+          // Text('2').height('10%')
+          HomeStrategyComponent()
         }.tabBar(this.TabBuilders(indexTabInfo[2]))
 
         TabContent(){
@@ -64,7 +65,7 @@ export struct IndexMainTab {
     }.backgroundColor(Color.White)
     .borderRadius($r('app.float.vp_twelve'))
     .width('100%')
-
+    .padding({ left: 15, right: 15 })
   }
 
 }

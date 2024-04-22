@@ -10,6 +10,7 @@ export class Constant{
 
 
   static readonly REQ_BANNER_URL: string = Constant.WL_BASE_URL + "/system/app/banner";
+  /**功能区**/
   static readonly REQ_FUNCTION_URL: string = Constant.WL_BASE_URL + "/system/app/navbar/secondFunc";
   static readonly  GET_ARTICLE_CONTENT: string = Constant.WL_BASE_URL + "/article/app/article/contentList";
   /**首页市场动态**/
@@ -22,4 +23,5 @@ export class Constant{
    * 首页-鼎圈动态
    */
   static readonly  HOME_RECOMMEND_CIRCLE_TRENDS: string =  Constant.WL_BASE_URL +  "/article/app/article/index/recommendList";
+   static readonly  GET_STRATEGY_TOOLS: string  = Constant.WL_BASE_URL + "/stockpool/app/strategy/tools";
 }
