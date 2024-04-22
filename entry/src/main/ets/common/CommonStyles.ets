@@ -6,3 +6,13 @@
   .borderRadius($r('app.float.vp_sixteen'))
   .backgroundColor(Color.White)
 }
+
+
+
+
+@Styles function pressedStyles() {
+  .opacity(0.7)
+}
+@Styles function normalStyles(){
+  .opacity(1)
+}

@@ -1,6 +1,6 @@
 
 import { MarketNewType } from '../../constants/CommEnum';
-import { CommonUtil } from '../../constants/CommonUtil';
+import { CommonUtil } from '../../utils/CommonUtil';
 
 export class MarketNew{
   contentId:number;

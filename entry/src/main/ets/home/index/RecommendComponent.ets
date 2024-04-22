@@ -3,13 +3,17 @@ import { DateUtil } from '../../common/constants/DateUtil';
 import Api from '../../common/net/Api';
 import { CircleInfo } from '../../common/net/model/CircleInfo';
 import { CircleTrendData } from '../../common/net/model/CircleTrendData';
+import Logger from '../../common/utils/Logger';
 import { TypeDQDT, TypeDQRecommend } from '../../data/RecommendDataType';
 import { LoadState, PageLoading } from '../../widget/PageLoading';
+import hilog from '@ohos.hilog';
 
 
 
 @Component
 export struct RecommendComponent {
+  private TAG = "RecommendComponent"
+
   private refreshConfig = new PullToRefreshConfigurator();
   private scroller: Scroller = new Scroller();
   @State loadState: LoadState = LoadState.LOADING;
@@ -167,7 +171,11 @@ struct DQRecommend {
       Row() {
         Text('鼎圈推荐').fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
-        Text('更多').fontSize(14)
+        Text('更多').fontSize(14).onClick(()=>{
+          Logger.info('RecommendComponent','点击')
+          hilog.info(0x0000, 'RecommendComponent', '点击了');
+        })
+
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
           .height(14).width(7).margin({ left: 5 })
       }.width('100%').margin({ top: 15, bottom: 10 })
@@ -188,7 +196,7 @@ struct DQRecommend {
               })
           }, (item: CircleInfo, index?: number) => index + JSON.stringify(item))
 
-        }.width('100%').justifyContent(FlexAlign.Start)
+        }
       }.scrollable(ScrollDirection.Horizontal)
       .scrollBar(BarState.Off)
 

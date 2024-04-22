@@ -2,6 +2,7 @@
 import { BannerData } from '../common/net/model/BannerData';
 import { ContentArticle } from '../common/net/model/ContentArticle';
 import { MFunction } from '../common/net/model/FunctionData';
+import { MarketNew } from '../common/net/model/MarketNew';
 
 
 /**
@@ -53,4 +54,25 @@ export class TypeSCJJ {
  */
 export class TypeIndexTab {
 
+}
+
+
+/**
+ * 首页动态样式1数据类型
+ */
+export class TypeDynamics1 {
+  marketNew: MarketNew;
+  constructor(data: MarketNew) {
+    this.marketNew=data;
+  }
+}
+
+/**
+ * 首页动态样式2数据类型
+ */
+export class TypeDynamics2 {
+  marketNew: MarketNew;
+  constructor(data: MarketNew) {
+    this.marketNew=data;
+  }
 }

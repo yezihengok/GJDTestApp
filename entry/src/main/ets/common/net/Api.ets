@@ -17,6 +17,7 @@ import { ContentArticle } from './model/ContentArticle';
 import { MarketNew } from './model/MarketNew';
 import { CircleInfo } from './model/CircleInfo';
 import { CircleTrendData } from './model/CircleTrendData';
+import { StrategyTools } from './model/StrategyTools';
 
 
 let TAG = "Api";
@@ -47,7 +48,7 @@ async function requestSync<T>(url: string, method: http.RequestMethod, extraData
       }
     }
     let httpRequest = http.createHttp();
-    Logger.debug( TAG, `start request, url: ${url}, method: ${method}, extraData: ` + JSON.stringify(extraData));
+    Logger.warn( TAG, `start request, url: ${url}, method: ${method}, extraData: ` + JSON.stringify(extraData));
     httpRequest.request(
       url,
       {
@@ -66,7 +67,7 @@ async function requestSync<T>(url: string, method: http.RequestMethod, extraData
             Object.assign(res, data.result);
           }
 
-          Logger.info(TAG, `url: ${url} header:${JSON.stringify(header)}
+          Logger.warn(TAG, `url: ${url} header:${JSON.stringify(header)}
           result: ${JSON.stringify(res)}`);
 
         } else {
@@ -105,7 +106,7 @@ export default class Api {
    * 根据功能区编码查询 (金刚区返回的是已编辑的)
    * @param codes 功能区编码(多个使用,分隔)
    */
-  async getFunction(codes: string): Promise<BaseRsp<Array<FunctionData>>> {
+  async getFunctionData(codes: string): Promise<BaseRsp<Array<FunctionData>>> {
     return requestSync(`${Constant.REQ_FUNCTION_URL}?codes=${codes}`, http.RequestMethod.GET);
   }
 
@@ -150,6 +151,9 @@ export default class Api {
     return requestSync(`${Constant.HOME_RECOMMEND_CIRCLE_TRENDS}?pageSize=${pageSize}`, http.RequestMethod.GET);
   }
 
+  async getStrategyTools(): Promise<BaseRsp<StrategyTools>> {
+    return requestSync(`${Constant.GET_STRATEGY_TOOLS}?code=stratagy`, http.RequestMethod.GET);
+  }
 /*  async getHomeArticleList(page: number): Promise<BaseRsp<ArticleList>> {
     return requestSync(`/article/list/${page}/json`, http.RequestMethod.GET);
   }

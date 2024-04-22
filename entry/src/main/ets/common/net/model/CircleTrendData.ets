@@ -23,6 +23,24 @@ export class CircleTrendData {
   viewNum: number; //浏览数
   detailLink: number; //详情页链接
 
+  /**老师观点*/
+  static readonly TYPE_TEACHER_ARTICLE:number=3;
+  /**老师直播**/
+  static readonly TYPE_TEACHER_LIVE:number=4;
+
+  // static getItemType(type:number): MarketNewType {
+  //   if(type===2){
+  //     return MarketNewType.ITEM_TYPE_PIC_AND_TEXT;
+  //   }else if(type===3 ||type===4){
+  //     return CircleTrendData.TYPE_TEACHER_LIVE;
+  //   }else if(type===1){
+  //     return MarketNewType.ITEM_TYPE_HTML_TEXT;
+  //   }else{
+  //     return CircleTrendData.TYPE_TEACHER_ARTICLE;
+  //   }
+  //
+  // }
+
 }
 
 export class RCInfo {
