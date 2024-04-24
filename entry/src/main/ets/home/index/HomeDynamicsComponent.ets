@@ -9,49 +9,58 @@ import Logger from '../../common/utils/Logger';
 import { toast } from '../../common/utils/Toast';
 import { CommonUtil } from '../../common/utils/CommonUtil';
 import { TypeDynamics1, TypeDynamics2 } from '../../data/HomeDataType';
+import { RefreshFooter } from '../../view/RefreshFooter';
+import { NoMoreFooter } from '../../view/NoMoreFooter';
 
 /**
  * 动态
  */
 @Component
-export struct IndexDynamicsComponent {
-  private TAG = "IndexDynamicsComponent"
-  private scroller: Scroller = new Scroller();
+export struct HomeDynamicsComponent {
+  private TAG = "HomeDynamicsComponent"
+  private scrollerForList: Scroller = new Scroller();
   private refreshConfig = new PullToRefreshConfigurator();
-
+  private parentScroller: Scroller
   @State data: Array<Object> = []
   private lastTimestamp: number = 0;
-  private hasMore: boolean = true;
+  @State hasMore: boolean = true;
   @State loadState: LoadState = LoadState.LOADING;
   @State showLoading: boolean = false;
-
+  /**0代表滚动到List顶部，1代表中间值，2代表滚动到List底部**/
+  @State listPosition: number = 0;
+  @State showLoadMore: boolean = false
+  @Consume homeReachEnd:boolean
+  @Consume homeReachStart:boolean
+  // @Consume reviewVotes: number;
+  @State scrollDown: boolean = false
   aboutToAppear() {
     // 设置属性
     this.refreshConfig
       .setHasRefresh(false) // 是否具有下拉刷新功能
       .setHasLoadMore(true) // 是否具有上拉加载功能
     this.loadData();
+
   }
 
   private loadData() {
     this.loadState = LoadState.LOADING
     this.loadDataByPage(0).then((data) => {
 
-        // this.data = data;
-        if (data.length === 0) {
-          this.loadState = LoadState.EMPTY;
-          this.data = null
-        } else {
-          this.loadState = LoadState.SUCCESS;
-          data.forEach(element => {
-            if (element.type === 1) {
-              this.data.push(new TypeDynamics1(element))
-            } else {
-              this.data.push(new TypeDynamics2(element))
-            }
-          });
-        }
-      },
+      // this.data = data;
+      if (data.length === 0) {
+        this.loadState = LoadState.EMPTY;
+        this.data = null
+      } else {
+        this.loadState = LoadState.SUCCESS;
+        data.forEach(element => {
+          if (element.type === 1) {
+            this.data.push(new TypeDynamics1(element))
+          } else {
+            this.data.push(new TypeDynamics2(element))
+          }
+        });
+      }
+    },
       (error) => {
         this.loadState = LoadState.FAIL;
       })
@@ -69,6 +78,45 @@ export struct IndexDynamicsComponent {
     })
   }
 
+  async loadMore() {
+    return new Promise<string>((resolve, reject) => {
+      if (this.hasMore) {
+        this.loadDataByPage(this.lastTimestamp).then(
+          (data) => {
+            if (data.length > 0) {
+
+              //this.data = this.data.concat(data);
+              data.forEach(element => {
+                if (element.type === 1) {
+                  this.data.push(new TypeDynamics1(element))
+                } else {
+                  this.data.push(new TypeDynamics2(element))
+                }
+              });
+
+              let item = this.data[this.data.length-1];
+              if (item instanceof TypeDynamics1) {
+                this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
+              } else if (item instanceof TypeDynamics2) {
+                this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
+              }
+
+              resolve('加载成功');
+            } else {
+              this.hasMore = false;
+              resolve('没有更多了');
+            }
+          },
+          (error) => {
+            resolve('加载失败');
+          }
+        )
+      } else {
+        resolve('没有更多了');
+      }
+    });
+  }
+
   build() {
     Column() {
       PageLoading({
@@ -79,82 +127,21 @@ export struct IndexDynamicsComponent {
           this.loadData();
         }
       }) {
-        // Scroll(){
+
         Column() {
-          // ForEach(this.data, (item: MarketNew) => {
-          //   if (item.type===1) {
-          //     MarketNewItemBuilder1({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
-          //       toast(JSON.stringify(marketNew))
-          //     } })
-          //   }else{
-          //     MarketNewItemBuilder2({ dataBean: item, onItemClick: (marketNew: MarketNew) => {
-          //       toast(JSON.stringify(marketNew))
-          //     } })
-          //   }
+          this.ListViewBuilder()
+          //第三方 PullToRefresh控件 与内部嵌套滑动后有冲突， 目前 api 9 官方暂无向android那样的标准嵌套滑动控件
+          // PullToRefresh({
+          //   data: $data,
+          //   scroller: this.scrollerForList,
+          //   refreshConfigurator: this.refreshConfig,
+          //   customList: this.ListViewBuilder,
+          //   onLoadMore: this.loadMore,
+          //   customLoad: null,
+          //   customRefresh: null,
           // })
-
-          PullToRefresh({
-            data: $data,
-            scroller: this.scroller,
-            refreshConfigurator: this.refreshConfig,
-            customList: this.ListViewBuilder,
-            // onRefresh: () => {
-            //   return new Promise<string>((resolve, reject) => {
-            //     this.loadDataByPage(0).then(
-            //       (data) => {
-            //         //this.nextPage = 1;
-            //         this.data = data;
-            //         resolve('刷新成功');
-            //       },
-            //       (error) => {
-            //         resolve('刷新失败');
-            //       }
-            //     )
-            //   });
-            // },
-            onLoadMore: () => {
-              return new Promise<string>((resolve, reject) => {
-                if (this.hasMore) {
-                  this.loadDataByPage(this.lastTimestamp).then(
-                    (data) => {
-                      if (data.length > 0) {
-
-                        //this.data = this.data.concat(data);
-                        data.forEach(element => {
-                          if (element.type === 1) {
-                            this.data.push(new TypeDynamics1(element))
-                          } else {
-                            this.data.push(new TypeDynamics2(element))
-                          }
-                        });
-
-                        let item = this.data[this.data.length-1];
-                      if (item instanceof TypeDynamics1) {
-                        this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
-                      }else if (item instanceof TypeDynamics2) {
-                        this.lastTimestamp = DateUtil.dateToStamp(item.marketNew.publishTime);
-                      }
-
-                        resolve('加载成功');
-                      } else {
-                        this.hasMore = false;
-                        resolve('没有更多了');
-                      }
-                    },
-                    (error) => {
-                      resolve('加载失败');
-                    }
-                  )
-                } else {
-                  resolve('没有更多了');
-                }
-              });
-            },
-            customLoad: null,
-            customRefresh: null,
-          })
         }
-        // }
+        .padding({ bottom: 50 })
         .width('100%')
         .height('100%')
       }
@@ -163,10 +150,13 @@ export struct IndexDynamicsComponent {
 
   @Builder
   ListViewBuilder() {
-    List({ scroller: this.scroller }) {
+    List({ scroller: this.scrollerForList }) {
+      // ListItem(){
+      //   Button(`reviewVotes(${this.reviewVotes}), give +1`)
+      //     .onClick(() => this.reviewVotes += 1)
+      // }
       ForEach(this.data, (item: MarketNew) => {
         ListItem() {
-
           // if(this.dataBean!=null &&this.dataBean==undefined) {
           //   if (item.type===1) {
           if (item instanceof TypeDynamics1) {
@@ -178,11 +168,15 @@ export struct IndexDynamicsComponent {
               toast(`marketNew.type:${marketNew.type}`)
             } })
           }
-
           //}
-
         }
       })
+      ListItem() {
+        RefreshFooter({ showFooter: this.showLoadMore })
+      }
+      ListItem() {
+        NoMoreFooter({ show: !this.hasMore })
+      }
     }
     .width('100%')
     .height('100%')
@@ -193,7 +187,43 @@ export struct IndexDynamicsComponent {
       startMargin: 1,
       endMargin: 1
     })
-    .edgeEffect(EdgeEffect.None) // 必须设置列表为滑动到边缘无效果
+     .edgeEffect(EdgeEffect.None) // 必须设置列表为滑动到边缘无效果
+    .onReachStart(() => {
+      this.listPosition = 0
+    })
+    .onReachEnd(() => {
+      this.listPosition = 2
+      if(this.hasMore){
+        this.showLoadMore = true
+        //上拉加载消失的太快延迟0.5s再去请求接口
+        setTimeout(() => {
+          // this.scrollerForList.scrollEdge(Edge.Bottom)
+          this.scrollerForList.scrollBy(0, $r('app.float.size_50'))
+          this.loadMore().then(() => {
+            this.showLoadMore = false
+          })
+        }, 200)
+      }
+    })
+    .onScrollFrameBegin((offset: number) => {//offset>0  往上滚动
+      this.scrollDown=offset<0;
+      // if ((this.listPosition == 0 && offset <= 0) || (this.listPosition == 2 && offset >= 0)) {
+
+      Logger.info(`homeReachEnd>>>${this.homeReachEnd} offset>>>${offset} listPosition===${this.listPosition}}`)
+      //父没有滚动到最底部情况下如果子滚动到list顶部了还往上滚动 或 父滚动到顶部了子往上滚动。 则交给父去滑动
+      if ( this.listPosition!=2&&offset>0 && !this.homeReachEnd || this.listPosition===0&&offset<0) {
+        if (this.parentScroller !== undefined) {
+          this.parentScroller.scrollBy(0, offset)
+
+        } else {
+          toast('onScrollFrameBegin:' + this.parentScroller)
+        }
+        return { offsetRemain: 0 }
+      }
+      this.listPosition = 1
+      return { offsetRemain: offset };
+    })
+
   }
 }
 

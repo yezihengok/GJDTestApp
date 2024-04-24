@@ -137,6 +137,8 @@ export struct RecommendComponent {
         ListItem() {
           if (item instanceof TypeDQRecommend) {
             DQRecommend({ dataList:item.dataList})
+          } else if (item instanceof TypeDQDT) {
+
           }
 
 
@@ -197,6 +199,11 @@ struct DQRecommend {
           }, (item: CircleInfo, index?: number) => index + JSON.stringify(item))
 
         }
+        .constraintSize({minWidth:'100%',maxWidth:Infinity})
+        // ARKUI 没有wrap_content概念，当父控件不设宽度（高度）时默认会居中，要想内容默认居左居右就要给一个宽度 Row().width('100%')
+        //但这样会带来一个问题，宽度被固定设置为屏幕100%, 子view item较多时又不能左右滑动了，
+        //constraintSize,设置控件最小最大宽度，不限制控件最大宽度，即可 控件较少时默认居左，较多超过1屏幕时 又可以左右滑动
+
       }.scrollable(ScrollDirection.Horizontal)
       .scrollBar(BarState.Off)
 
@@ -241,7 +248,7 @@ struct DQItem {
     .width('33%')
     .borderRadius(8)
     .backgroundColor('#f9f9f9')
-    .margin({ left: this.marginLeft })
+    // .margin({ left: this.marginLeft })
     .padding(10)
   }
 }

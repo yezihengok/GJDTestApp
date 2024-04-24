@@ -1,7 +1,7 @@
 
 
 import { indexTabInfo, TabModel } from '../../data/HomeTabData';
-import { IndexDynamicsComponent } from './HomeDynamicsComponent';
+import { HomeDynamicsComponent } from './HomeDynamicsComponent';
 import { HomeStrategyComponent } from './HomeStrategyComponent';
 import { RecommendComponent } from './RecommendComponent';
 
@@ -10,6 +10,8 @@ import { RecommendComponent } from './RecommendComponent';
  */
 @Component
 export struct IndexMainTab {
+  private parentScroller: Scroller
+
   //自定义样式时 需要定义TabsController控制切换滑动
   private tabsController : TabsController = new TabsController()
   @State currentIndex:number=0
@@ -32,11 +34,11 @@ export struct IndexMainTab {
     }.onClick(() => {
       this.currentIndex = info.index;
       this.tabsController.changeIndex(this.currentIndex);
-      this.refreshConfig.setHasLoadMore(this.currentIndex==0||this.currentIndex==3)
+      // this.refreshConfig.setHasLoadMore(this.currentIndex==0||this.currentIndex==3)
       this.refreshConfig.setHasRefresh(true)
     })
     .width('100%')
-    .height(50)
+    // .height('100%')
     .justifyContent(FlexAlign.Center)
   }
 
@@ -53,15 +55,16 @@ export struct IndexMainTab {
 
         TabContent(){
           // Text('2').height('10%')
-          HomeStrategyComponent()
+          HomeStrategyComponent({parentScroller:this.parentScroller})
         }.tabBar(this.TabBuilders(indexTabInfo[2]))
 
         TabContent(){
-          IndexDynamicsComponent()
+          HomeDynamicsComponent({parentScroller:this.parentScroller})
         }.tabBar(this.TabBuilders(indexTabInfo[3]))
 
 
       }.scrollable(false).height('100%')
+       // .constraintSize({minHeight:'90%',maxHeight:Infinity})
     }.backgroundColor(Color.White)
     .borderRadius($r('app.float.vp_twelve'))
     .width('100%')

@@ -32,18 +32,6 @@ let newsViewModel = new BannerViewModel();
 export default newsViewModel as BannerViewModel;
 
 
-export class ResponseResult {
-
-  code: string;
-  msg: string |Resource;
-  data: string | Object | ArrayBuffer;
-
-  constructor() {
-    this.code = '';
-    this.msg = '';
-    this.data = '';
-  }
-}
 
 
 
