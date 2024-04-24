@@ -31,7 +31,7 @@ struct MainPage {
       this.tabsController.changeIndex(this.currentIndex);
     })
     .width('100%')
-    .height(50)
+    .height("100%")
     .justifyContent(FlexAlign.Center)
   }
 

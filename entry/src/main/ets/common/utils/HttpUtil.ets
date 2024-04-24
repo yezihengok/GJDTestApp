@@ -15,8 +15,21 @@
 
 import http from '@ohos.net.http';
 import { Headers } from '../../data/HeadersData';
-import { ResponseResult } from '../../viewmodel/BannerViewModel';
+
 import { Config } from '../constants/Config';
+
+
+export class ResponseResult {
+  code: string;
+  msg: string |Resource;
+  data: string | Object | ArrayBuffer;
+
+  constructor() {
+    this.code = '';
+    this.msg = '';
+    this.data = '';
+  }
+}
 
 /**
  * Initiates an HTTP request to a given URL.

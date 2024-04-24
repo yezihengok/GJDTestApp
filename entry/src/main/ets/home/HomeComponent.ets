@@ -21,7 +21,12 @@ import { TypeBanner, TypeIndexTab, TypeJGQ, TypeJRKB, TypeSCJJ } from '../data/H
 @Component
 export struct HomeComponent {
   @State data: Array<Object> = []; //下拉刷新总数据源
+  @State offsetY: number = 0
 
+  //后代通过使用@Consume去获取@Provide提供的变量，建立在@Provide和@Consume之间的双向数据同步，与@State/@Link不同的是，前者可以在多层级的父子组件之间传递。
+  @Provide homeReachEnd: boolean = false
+  @Provide homeReachStart: boolean = true
+  @State isRefreshing: boolean = false
   @State functionList: Array<MFunction> = [];
   @State functionSuccess: boolean = false
   @State bannerList: Array<BannerData> = [];
@@ -85,82 +90,13 @@ export struct HomeComponent {
       this.data[2] = new TypeJRKB()
       this.data[3] = new TypeSCJJ(this.SCJJList)
       this.data[4] = new TypeIndexTab()
+      this.isRefreshing = false
       resolve(this.data);
 
     })
   }
 
 
-  /*
-   async loadBannerData(bannerCode: string): Promise<Array<Object>> {
-      return new Promise<Array<Object>>(async (resolve, reject) => {
-        let bannerRsp = await Api.get().getBanner(bannerCode);
-        if (bannerRsp.isSuccess()) {
-          let bannerDataList = bannerRsp.data;
-
-          this.bannerList = bannerDataList;
-          this.bannerSuccess = this.bannerList.length > 0
-          resolve(bannerDataList);
-        } else {
-          reject();
-        }
-      })
-    }
-
-    async loadFunctionData(code: string): Promise<Array<Object>> {
-      return new Promise<Array<Object>>(async (resolve, reject) => {
-        let bannerRsp = await Api.get().getFunction(code);
-        if (bannerRsp.isSuccess()) {
-          let data = bannerRsp.data;
-
-          //处理数据 10个分一组，最多分2组
-          this.functions = new Array<Array<MFunction>>();
-
-          if (data.length > 0 && data[0] != null && data[0].secondNavbars.length > 0) {
-            this.functionList = data[0].secondNavbars; //code 只穿一个列表只会返回1个
-            //如果功能超过10个就把更多换到第10个
-            if (this.functionList.length > 10) {
-              for (var i = 0; i <= this.functionList.length; i++) {
-                if (this.functionList[i].link == Config.HOME_ICON_NAVIGATION) {
-                  CommonUtil.arrIndexExchange(this.functionList, i, 9);
-                  break;
-                }
-              }
-              this.functions.push(this.functionList.slice(0, 10))
-              this.functions.push(this.functionList.slice(10))
-            } else {
-              this.functions.push(this.functionList)
-            }
-          }
-
-          this.functionSuccess = this.functions.length > 0
-          resolve(data);
-        } else {
-          reject();
-        }
-      })
-    }
-
-    async loadSCJJData(): Promise<Array<Object>> {
-      let req: ContentListReq = {
-        categoryIdList: [818, 819, 820, 821, 911],
-        pageSize: 10
-      };
-      return new Promise<Array<Object>>(async (resolve, reject) => {
-        let rsp = await Api.get().queryContentList(req);
-        if (rsp.isSuccess()) {
-          let list = rsp.data;
-
-          this.SCJJList = list;
-          this.showSCJJSwiper = list.length > 0
-
-          resolve(list);
-        } else {
-          reject();
-        }
-      })
-    }
-    */
 
   aboutToAppear() {
     // 设置属性
@@ -192,10 +128,15 @@ export struct HomeComponent {
   private getListView() {
 
     List({ space: 0, scroller: this.scroller }) {
+      // ListItem(){
+      //   Button(`reviewVotes(${this.reviewVotes}), give +1`)
+      //     .onClick(() => this.reviewVotes += 1)
+      // }
       ForEach(this.data, (item: object, index) => {
         ListItem() {
           if (item instanceof TypeJGQ) {
-            FunctionBuilder({ data: item }).margin({ left: $r('app.float.vp_component_left_right'), right: $r('app.float.vp_component_left_right') })
+            FunctionBuilder({ data: item })
+              .margin({ left: $r('app.float.vp_component_left_right'), right: $r('app.float.vp_component_left_right') })
           } else if (item instanceof TypeJRKB) {
             KanBoard().margin({ left: 15, right: 15 })
           }
@@ -204,115 +145,168 @@ export struct HomeComponent {
           } else if (item instanceof TypeSCJJ) {
             SCJJSwiper({ data: item }).margin({ left: 15, right: 15 })
           } else if (item instanceof TypeIndexTab) {
-            IndexMainTab({ refreshConfig: this.refreshConfigurator }).margin({ top: 10 })
+            IndexMainTab({ refreshConfig: this.refreshConfigurator, parentScroller: this.scroller }).margin({ top: 10 })
 
           }
-
         }
         // .backgroundColor(CommonUtil.getTestColor(index))
       })
-    }.width('100%').height('100%')
+    }
+    .width('100%')
+    .height('100%')
     .listDirection(Axis.Vertical)
     .backgroundColor(Color.Transparent)
     .edgeEffect(EdgeEffect.None) // 必须设置列表为滑动到边缘无效果
-
+    .onReachStart(() => {
+      Logger.info(`首页滚动到Start了`)
+      this.homeReachStart=true;
+    })
+    .onReachEnd(() => {
+      Logger.info(`首页滚动到End了`)
+      this.homeReachEnd = true;
+    })
+    .onScroll((xOffset, yOffset) => {
+      this.offsetY = this.scroller.currentOffset().yOffset;
+      Logger.info(`currentOffsetY>>${this.offsetY} yOffset>>${yOffset}`)
+      this.homeReachEnd = false;
+      this.homeReachStart=false;
+    })
   }
 
   build() {
-    Scroll() {
-      Column() {
-        Stack({ alignContent: Alignment.Top }) {
-          Image($r('app.media.home_top_bg'))
-            .width('100%')
-              // .height('220vp')
-            .objectFit(ImageFit.Auto)
-          Column() {
+    // Scroll() {
+    Column() {
+      Stack({ alignContent: Alignment.Top }) {
+        Image($r('app.media.home_top_bg'))
+          .width('100%')
+            // .height('220vp')
+          .objectFit(ImageFit.Auto)
+        Column() {
+          Row() {
+            Image($r('app.media.up_common_mine_default_ic'))
+              .width('26vp').height('26vp').borderRadius(20)
+
             Row() {
-              Image($r('app.media.up_common_mine_default_ic'))
-                .width('26vp').height('26vp').borderRadius(20)
+              Image($r('app.media.home_search_icon'))
+                .width('20vp').height('20vp')
+              Text('搜索股票/资讯/功能').fontColor(Color.White).fontSize(14).margin({ left: 5 })
+            }
+            .height('28vp')
+            .borderRadius(20)
+            .backgroundColor('#45ffffff')
+            .layoutWeight(1)
+            .padding({ left: 12, right: 12 })
+            .margin({ left: 12, right: 12 })
 
-              Row() {
-                Image($r('app.media.home_search_icon'))
-                  .width('20vp').height('20vp')
-                Text('搜索股票/资讯/功能').fontColor(Color.White).fontSize(14).margin({ left: 5 })
-              }
-              .height('28vp')
-              .borderRadius(20)
-              .backgroundColor('#45ffffff')
-              .layoutWeight(1)
-              .padding({ left: 12, right: 12 })
-              .margin({ left: 12, right: 12 })
+            Image($r('app.media.home_customer_service_light_icon'))
+              .width($r('app.float.vp_twenty_four'))
+              .height($r('app.float.vp_twenty_four'))
 
-              Image($r('app.media.home_customer_service_light_icon'))
-                .width($r('app.float.vp_twenty_four'))
-                .height($r('app.float.vp_twenty_four'))
+            Image($r('app.media.home_message_light_icon'))
+              .width($r('app.float.vp_twenty_four'))
+              .height($r('app.float.vp_twenty_four'))
+              .margin({ left: $r('app.float.vp_twenty') }).onClick(() => {
+              // this.bannerSuccess=true
+              this.refreshData()
 
-              Image($r('app.media.home_message_light_icon'))
-                .width($r('app.float.vp_twenty_four'))
-                .height($r('app.float.vp_twenty_four'))
-                .margin({ left: $r('app.float.vp_twenty') }).onClick(() => {
-                // this.bannerSuccess=true
-                this.refreshData()
-
-              })
-
-            }.margin({ top: 5, bottom: 10,left:15,right:15 })
-            .width('100%')
-
-            /*  if (this.functionSuccess) {
-                          FunctionBuilder({ dataList: this.functions })
-                        }
-                        if (this.bannerSuccess) {
-                          BannerBuilder({ dataList: $bannerList })
-                        }
-
-                        KanBoard()
-                        if (this.showSCJJSwiper) {
-                          //$数据 初始化@Link
-                          SCJJSwiper({ dataList: $SCJJList })
-                        }
-                        IndexMainTab().margin({ top: 10 })*/
-
-            PullToRefresh({
-              // 必传项，列表组件所绑定的数据
-              data: $data,
-              // 必传项，需绑定传入主体布局内的列表或宫格组件
-              scroller: this.scroller,
-              // 必传项，自定义主体布局，内部有列表或宫格组件
-              customList: this.getListView,
-              // 可选项，组件属性配置，具有默认值
-              refreshConfigurator: this.refreshConfigurator,
-              // 可选项，下拉刷新回调
-              onRefresh: () => {
-                toast("onRefresh")
-                this.refreshData()
-                return new Promise<string>((resolve, reject) => {
-                  // 模拟网络请求网络2秒后得到数据，通知组件，变更列表数据
-                  setTimeout(() => {
-                    resolve('刷新成功');
-                    //this.data = this.dataNumbers;
-                  }, 2000);
-                });
-              },
-              // 可选项，上拉加载更多回调
-              onLoadMore: () => {
-                return new Promise<string>((resolve, reject) => {
-                  // 模拟网络请求操作，请求网络2秒后得到数据，通知组件，变更列表数据
-                  setTimeout(() => {
-                    resolve('');
-                    // this.data.push("增加的条目" + this.data.length);
-                  }, 2000);
-                });
-              },
-              customLoad: null,
-              customRefresh: null,
             })
 
-          }
-        }.width('100%')
+          }.margin({ top: 5, bottom: 10 })
+          .width('100%').padding({ left: 15, right: 15 })
+          // Button(`reviewVotes(${this.reviewVotes})`)
+          //   .onClick(() => this.reviewVotes += 1)
 
-      }.height('100%')
-    }
+          //目前版本的 PullToRefresh 的List 内部嵌套滚动控件 会有问题
+          // PullToRefresh({
+          //   // 必传项，列表组件所绑定的数据
+          //   data: $data,
+          //   // 必传项，需绑定传入主体布局内的列表或宫格组件
+          //   scroller: this.scroller,
+          //   // 必传项，自定义主体布局，内部有列表或宫格组件
+          //   customList: this.getListView,
+          //   // 可选项，组件属性配置，具有默认值
+          //   refreshConfigurator: this.refreshConfigurator,
+          //   // 可选项，下拉刷新回调
+          //   onRefresh: () => {
+          //     toast("onRefresh")
+          //     this.refreshData()
+          //     return new Promise<string>((resolve, reject) => {
+          //       // 模拟网络请求网络2秒后得到数据，通知组件，变更列表数据
+          //       setTimeout(() => {
+          //         resolve('刷新成功');
+          //         //this.data = this.dataNumbers;
+          //       }, 2000);
+          //     });
+          //   },
+          //   // 可选项，上拉加载更多回调
+          //   onLoadMore: () => {
+          //     return new Promise<string>((resolve, reject) => {
+          //       // 模拟网络请求操作，请求网络2秒后得到数据，通知组件，变更列表数据
+          //       setTimeout(() => {
+          //         resolve('');
+          //         // this.data.push("增加的条目" + this.data.length);
+          //       }, 2000);
+          //     });
+          //   },
+          //   customLoad: null,
+          //   customRefresh: null,
+          // })
+
+          Refresh({ refreshing: $$this.isRefreshing, offset: 100, friction: 100 }){
+            List({ space: 0, scroller: this.scroller }) {
+              // ListItem(){
+              //   Button(`reviewVotes(${this.reviewVotes}), give +1`)
+              //     .onClick(() => this.reviewVotes += 1)
+              // }
+              ForEach(this.data, (item: object, index) => {
+                ListItem() {
+                  if (item instanceof TypeJGQ) {
+                    FunctionBuilder({ data: item })
+                      .margin({ left: $r('app.float.vp_component_left_right'), right: $r('app.float.vp_component_left_right') })
+                  } else if (item instanceof TypeJRKB) {
+                    KanBoard().margin({ left: 15, right: 15 })
+                  }
+                  else if (item instanceof TypeBanner) {
+                    BannerBuilder({ data: item }).margin({ left: 15, right: 15 })
+                  } else if (item instanceof TypeSCJJ) {
+                    SCJJSwiper({ data: item }).margin({ left: 15, right: 15 })
+                  } else if (item instanceof TypeIndexTab) {
+                    IndexMainTab({ refreshConfig: this.refreshConfigurator, parentScroller: this.scroller }).margin({ top: 10 })
+
+                  }
+                }
+                // .backgroundColor(CommonUtil.getTestColor(index))
+              })
+            }
+            .width('100%')
+            .height('100%')
+            .listDirection(Axis.Vertical)
+            .backgroundColor(Color.Transparent)
+            .edgeEffect(EdgeEffect.None) // 必须设置列表为滑动到边缘无效果
+            .onReachStart(() => {
+              Logger.info(`首页滚动到Start了`)
+              this.homeReachStart=true;
+            })
+            .onReachEnd(() => {
+              Logger.info(`首页滚动到End了`)
+              this.homeReachEnd = true;
+            })
+            .onScroll((xOffset, yOffset) => {
+              // this.offsetY = this.scroller.currentOffset().yOffset;
+              // Logger.info(`currentOffsetY>>${this.offsetY} yOffset>>${yOffset}`)
+              this.homeReachEnd = false;
+              this.homeReachStart=false;
+            })
+          }.onRefreshing(() => {
+
+            this.refreshData()
+          })
+
+        }
+      }.width('100%')
+
+    }.height('100%')
+    // }
   }
 }
 
@@ -395,12 +389,16 @@ struct SCJJSwiper {
             }
             // .alignItems(HorizontalAlign.Start)
           }, (item: ContentArticle) => JSON.stringify(item))
-        }.autoPlay(true)
+        }
+        .autoPlay(true)
         .loop(true)
         .vertical(true)
         .indicator(false)
+        .layoutWeight(1)
       }
-    }.margin({ top: 10 })
+    }
+    .width('100%')
+    .margin({ top: 10 })
     .padding(5)
     .borderRadius(5)
     .backgroundColor('#fff8f8f8')

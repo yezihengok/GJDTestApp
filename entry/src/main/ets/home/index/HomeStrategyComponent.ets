@@ -13,6 +13,9 @@ import { EmptyView, UPEmptyType } from '../../widget/EmptyView';
 import { RouterUtil } from '../../common/utils/RouterUtil';
 import { H5Address } from '../../common/constants/H5Address';
 
+/**
+ * 策略
+ */
 @Component
 export struct HomeStrategyComponent {
   @State loadState: LoadState = LoadState.LOADING;
@@ -21,7 +24,10 @@ export struct HomeStrategyComponent {
   private TAG = "IndexDynamicsComponent"
   @State data: Array<BaseItemType> = []
   @State strategy: StrategyTools = null;
-
+  private scrollerForList: Scroller = new Scroller()
+  private parentScroller: Scroller = new Scroller()
+  @State listPosition: number = 0; // 0代表滚动到List顶部，1代表中间值，2代表滚动到List底部
+  @Consume homeReachEnd:boolean
   aboutToAppear() {
     this.loadData(true)
 
@@ -69,6 +75,7 @@ export struct HomeStrategyComponent {
   }
 
   build() {
+
     PageLoading({
       loadState: $loadState,
       showLoading: $showLoading,
@@ -78,7 +85,7 @@ export struct HomeStrategyComponent {
       }
     }) {
       Column() {
-        List({ space: 0 }) {
+        List({ space: 0 ,scroller:this.scrollerForList}) {
           ForEach(this.data, (item: BaseItemType) => {
             ListItem() {
               if (item instanceof NSPools) {
@@ -101,11 +108,32 @@ export struct HomeStrategyComponent {
               }
             }
           })
-        }.width('100%')
-        .height('100%')
-        // .edgeEffect(EdgeEffect.None)
-      }.width('100%')
-      .height('100%')
+        }.width('100%').height('100%')
+        .padding({bottom:50})
+        .edgeEffect(EdgeEffect.None)
+        .onReachStart(() => {
+          this.listPosition = 0
+          //toast('滚动到Start了')
+        })
+        .onReachEnd(() => {
+          this.listPosition = 2
+           //toast('滚动到End了')
+        })
+        //onScrollFrameBegin实现嵌套滑动，
+        .onScrollFrameBegin((offset: number) => {
+          //如果滚动到list顶部了还往下滚动或 滚动到list底部了还往下滚动，则让父Scroll去滚动
+          // if ((this.listPosition == 0 && offset <= 0) || (this.listPosition == 2 && offset >= 0)) {
+            if ( this.listPosition!=2&&offset>0 && !this.homeReachEnd || this.listPosition===0&&offset<0) {
+            if(this.parentScroller!== undefined){
+              this.parentScroller.scrollBy(0, offset)
+            }
+            return { offsetRemain: 0 }
+          }
+          this.listPosition = 1
+          return { offsetRemain: offset };
+        })
+      }.width('100%').height('100%')
+
     }
   }
 }
