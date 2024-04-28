@@ -12,6 +12,7 @@ import { ContentArticle } from '../common/net/model/ContentArticle';
 import { ContentListReq } from '../common/net/model/Request';
 import { IndexMainTab } from './index/IndexMainTab';
 import { TypeBanner, TypeIndexTab, TypeJGQ, TypeJRKB, TypeSCJJ } from '../data/HomeDataType';
+import { hideLoadingDialog, showLoadingDialog } from '../common/utils/DialogUtils';
 
 
 // It's not a recommended way to export struct with @Entry decorator
@@ -92,7 +93,7 @@ export struct HomeComponent {
       this.data[4] = new TypeIndexTab()
       this.isRefreshing = false
       resolve(this.data);
-
+      hideLoadingDialog()
     })
   }
 
@@ -298,7 +299,7 @@ export struct HomeComponent {
               this.homeReachStart=false;
             })
           }.onRefreshing(() => {
-
+            showLoadingDialog("加载中~")
             this.refreshData()
           })
 

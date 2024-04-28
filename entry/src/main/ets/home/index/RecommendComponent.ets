@@ -183,7 +183,7 @@ struct DQRecommend {
       }.width('100%').margin({ top: 15, bottom: 10 })
 
       Scroll() {
-        Row() {
+        Row({space:this.marginLeft}) {
           ForEach(this.dataList, (item: CircleInfo, index) => {
             DQItem({ marginLeft: index > 0 ? this.marginLeft : 0
             , info: item

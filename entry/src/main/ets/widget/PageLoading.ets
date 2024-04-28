@@ -1,4 +1,5 @@
 import { MaterialProgressBar, MaterialProgressStyle } from '@ohos/materialprogressbar'
+import { toast } from '../common/utils/Toast';
 
 export enum LoadState {
   LOADING,
@@ -9,37 +10,67 @@ export enum LoadState {
 
 @Component
 export struct PageLoading {
-  @Link loadState: LoadState;
+  @Link  @Watch('changeState')loadState: LoadState;
   onReload?: () => void;
   @Link showLoading: boolean;
   @BuilderParam content: () => void;
+  @State rotateAngle: number = 0
 
+  changeState() {
+    if(this.loadState === LoadState.LOADING ||this.loadState === LoadState.SUCCESS){
+      setTimeout(()=>{
+        this.rotateAngle = 360
+        toast("开始")
+      },100)
+
+    }
+
+  }
   build() {
     Stack() {
       if (this.loadState === LoadState.LOADING) {
-        MaterialProgressBar({ style: MaterialProgressStyle.MaterialCircular,
-          modelBuild: {
-            color: $r("app.color.main"),
-            bgColor: $r("app.color.divider"),
-            indeterminate: true,
-            strokeWidth: 4
-          } })
-          .margin({ left: 16, top: 16 })
-          .align(Alignment.Center)
+        // MaterialProgressBar({ style: MaterialProgressStyle.MaterialCircular,
+        //   modelBuild: {
+        //     color: $r("app.color.main"),
+        //     bgColor: $r("app.color.divider"),
+        //     indeterminate: true,
+        //     strokeWidth: 4
+        //   } })
+        //   .margin({ left: 16, top: 16 })
+        //   .align(Alignment.Center)
+        Image($r('app.media.common_loading'))
+          .height($r('app.float.size_45'))
+          .width($r("app.float.size_45"))
+          .rotate({ angle: this.rotateAngle })
+          .animation({
+            duration: 300,
+            iterations: -1,
+            curve: Curve.Linear,
+          }).align(Alignment.Center)
+
       } else if (this.loadState === LoadState.SUCCESS) {
         this.content();
         if (this.showLoading) {
           Stack() {
             Stack() {
-              MaterialProgressBar({ style: MaterialProgressStyle.MaterialCircular,
-                modelBuild: {
-                  color: $r("app.color.white"),
-                  bgColor: Color.Transparent,
-                  indeterminate: true,
-                  strokeWidth: 4,
-                } })
-                .margin({ left: 16, top: 16 })
-                .align(Alignment.Center)
+              // MaterialProgressBar({ style: MaterialProgressStyle.MaterialCircular,
+              //   modelBuild: {
+              //     color: $r("app.color.white"),
+              //     bgColor: Color.Transparent,
+              //     indeterminate: true,
+              //     strokeWidth: 4,
+              //   } })
+              //   .margin({ left: 16, top: 16 })
+              //   .align(Alignment.Center)
+              Image($r('app.media.common_loading'))
+                .height($r('app.float.size_45'))
+                .width($r("app.float.size_45"))
+                .rotate({ angle: this.rotateAngle })
+                .animation({
+                  duration: 500,
+                  iterations: -1,
+                  curve: Curve.Friction,
+                }).align(Alignment.Center)
             }
             .width(100)
             .height(100)
