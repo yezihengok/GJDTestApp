@@ -18,6 +18,8 @@ import { MarketNew } from './model/MarketNew';
 import { CircleInfo } from './model/CircleInfo';
 import { CircleTrendData } from './model/CircleTrendData';
 import { StrategyTools } from './model/StrategyTools';
+import { UPServiceConfig } from '../constants/UPServiceConfig';
+import { CommonUtil } from '../utils/CommonUtil';
 
 
 let TAG = "Api";
@@ -66,6 +68,17 @@ async function requestSync<T>(url: string, method: http.RequestMethod, extraData
           } else {
             Object.assign(res, data.result);
           }
+
+          //todo 测试用~~~~~~~~~~~~~~~~~~~~~~~~
+          //if(data.result===null){
+            if(url.startsWith(Constant.REQ_BANNER_URL)){
+              Logger.warn("banner接口无数据，，添加测试默认banner数据")
+              Object.assign(res, JSON.parse(UPServiceConfig.test_banner_data));
+
+            }else{
+              Logger.warn(`请求:${url}`)
+            }
+         // }
 
           Logger.warn(TAG, `url: ${url} header:${JSON.stringify(header)}
           result: ${JSON.stringify(res)}`);

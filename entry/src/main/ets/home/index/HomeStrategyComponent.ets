@@ -62,10 +62,11 @@ export struct HomeStrategyComponent {
       this.data[5] = new ZYDGPools(this.hashMap.hasKey(UPServiceConfig.SY_CL_ZYDGCL), this.strategy.zydgPools)
       this.data[6] = new PEGPools(this.hashMap.hasKey(UPServiceConfig.SY_CL_PEGCL), this.strategy.pegPools)
 
+      //为了看到页面UI效果暂时屏蔽，目前接口配置的几乎都没权限了，
       //过滤掉没有权限的项
-      this.data = this.data.filter(item => {
-        return item.hasPermission == true
-      })
+      // this.data = this.data.filter(item => {
+      //   return item.hasPermission == true
+      // })
 
       if (firstTime) this.loadState = LoadState.SUCCESS;
     } else {

@@ -23,10 +23,11 @@ export default struct BannerBuilder {
             Column() {
               Image(item.materialImg).onClick(() => {
                 promptAction.showToast({ message: item.linkUrl })
-              })
+              }).borderRadius(8)
             }.borderRadius(5)
           }, (item: BannerData, index: number) => JSON.stringify(item) + index)
-        }.height('100vp')
+        }.height(95)
+
         .autoPlay(true)
         .index(this.bannerPosition)
         .loop(true)
