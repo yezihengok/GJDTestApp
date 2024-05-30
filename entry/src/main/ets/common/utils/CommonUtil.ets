@@ -13,6 +13,16 @@ export class CommonUtil {
     return array
   }
 
+
+  static subList(list: Array<any>,start:number,end:number){
+    if(CommonUtil.isListNull(list)){
+      return [];
+    }
+    //区别1：splice方法会对原数组产生修改，slice方法不会
+    //区别2：splice的第二个参数代表的是个数，但是slice的第二个参数代表的是区间（包含左边不包含右边）
+   return list.slice(start,end)
+  }
+
   static getTestColor(index: number) {
     let color: Color = Color.Orange
     if (index % 2 == 0) {
@@ -56,5 +66,17 @@ export class CommonUtil {
       return num;
     }
   }
+
+  /**
+   * 生成 [ n, m ) 范围内的随机数（大于等于n，小于m）
+   * @param start
+   * @param end
+   */
+  static getRandom(n:number,m:number){
+    let random=Math.random()*(m-n)+n;
+    //随机数四舍五入取整返回
+    return Math.round(random)
+  }
+
 
 }
