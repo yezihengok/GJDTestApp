@@ -5,6 +5,8 @@ import WindowUtils from '../common/utils/WindowUtils';
 @Component
 export struct TitleLayout {
   @Link title: string;
+  @Prop titleBarBg: Resource=$r("app.color.title_bar_bg")
+
   isJustShowStatusBar: boolean = false;
   showBack: boolean = true;
   onBack: () => void = () => {
@@ -62,6 +64,6 @@ export struct TitleLayout {
       }
     }
     .width('100%')
-    .backgroundColor($r("app.color.title_bar_bg"))
+    .backgroundColor(this.titleBarBg)
   }
 }

@@ -97,6 +97,7 @@ struct MainPage {
         }.tabBar(this.TabBuilder(homeTabInfo[4]))
 
       }.scrollable(false)
+      .barHeight(70)
     }.backgroundColor(Color.White).width('100%')
 
   }

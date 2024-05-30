@@ -1,6 +1,7 @@
 import router from '@ohos.router';
 import CopyrightComponent from '../view/CopyrightComponent';
 import { Config } from '../common/constants/Config';
+import WindowUtils from '../common/utils/WindowUtils';
 
 /**
  * SplashScreenPage is the entry of the application and shows how to develop a front page.
@@ -22,7 +23,7 @@ struct SplashScreenPage {
 
      //   AdvertiseIcon()
 
-        SkipButton({ secondsCount: (Config.DELAY_SECONDS - this.pageShowTime) })
+        SkipButton({ secondsCount: (Config.DELAY_SECONDS - this.pageShowTime) }).margin({top:WindowUtils.statusBarHeight + 'px'})
       }
       .layoutWeight(Config.STACK_LAYOUT_WEIGHT)
       .width(Config.STACK_WIDTH)

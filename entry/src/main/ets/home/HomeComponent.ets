@@ -13,6 +13,7 @@ import { ContentListReq } from '../common/net/model/Request';
 import { IndexMainTab } from './index/IndexMainTab';
 import { TypeBanner, TypeIndexTab, TypeJGQ, TypeJRKB, TypeSCJJ } from '../data/HomeDataType';
 import { hideLoadingDialog, showLoadingDialog } from '../common/utils/DialogUtils';
+import WindowUtils from '../common/utils/WindowUtils';
 
 
 // It's not a recommended way to export struct with @Entry decorator
@@ -303,7 +304,7 @@ export struct HomeComponent {
             this.refreshData()
           })
 
-        }
+        }.padding({top:WindowUtils.statusBarHeight + 'px'})
       }.width('100%')
 
     }.height('100%')
