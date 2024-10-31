@@ -1,5 +1,4 @@
-
-
+import { PullToRefreshConfigurator } from '@ohos/pulltorefresh';
 import { indexTabInfo, TabModel } from '../../data/HomeTabData';
 import { HomeDynamicsComponent } from './HomeDynamicsComponent';
 import { HomeStrategyComponent } from './HomeStrategyComponent';
@@ -10,14 +9,14 @@ import { RecommendComponent } from './RecommendComponent';
  */
 @Component
 export struct IndexMainTab {
-  private parentScroller: Scroller
+  private parentScroller?: Scroller
 
   //自定义样式时 需要定义TabsController控制切换滑动
   private tabsController : TabsController = new TabsController()
   @State currentIndex:number=0
 
-  // @ts-ignore
- private refreshConfig: PullToRefreshConfigurator
+
+ private refreshConfig: PullToRefreshConfigurator|null=null
   @Builder TabBuilders(info:TabModel) {
 
     Column() {
@@ -35,7 +34,7 @@ export struct IndexMainTab {
       this.currentIndex = info.index;
       this.tabsController.changeIndex(this.currentIndex);
       // this.refreshConfig.setHasLoadMore(this.currentIndex==0||this.currentIndex==3)
-      this.refreshConfig.setHasRefresh(true)
+      this.refreshConfig?.setHasRefresh(true)
     })
     .width('100%')
     // .height('100%')

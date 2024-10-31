@@ -1,5 +1,6 @@
 import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
 import bundleManager from '@ohos.bundle.bundleManager';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 export default class OHPermission {
   static requestPermission(context: Context, permissionList: Permissions[]): Promise<void> {
@@ -19,7 +20,7 @@ export default class OHPermission {
           // 授权成功
           resolve()
         })
-        .catch((err) => {
+        .catch((err:BusinessError) => {
           console.error(`requestPermissionsFromUser failed, code is ${err.code}, message is ${err.message}`);
           reject()
         })
@@ -27,7 +28,7 @@ export default class OHPermission {
   }
 
   static async checkPermission(permission: Permissions): Promise<boolean> {
-    let grantStatus: abilityAccessCtrl.GrantStatus = await this.checkAccessToken(permission);
+    let grantStatus: abilityAccessCtrl.GrantStatus = await OHPermission.checkAccessToken(permission);
     if (grantStatus === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
       // 已经授权，可以继续访问目标操作
       return true
@@ -38,10 +39,10 @@ export default class OHPermission {
 
   private static async checkAccessToken(permission: Permissions): Promise<abilityAccessCtrl.GrantStatus> {
     let atManager = abilityAccessCtrl.createAtManager();
-    let grantStatus: abilityAccessCtrl.GrantStatus;
+    let grantStatus: abilityAccessCtrl.GrantStatus=abilityAccessCtrl.GrantStatus.PERMISSION_DENIED;
 
     // 获取应用程序的accessTokenID
-    let tokenId: number;
+    let tokenId: number=0;
     try {
       let bundleInfo: bundleManager.BundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
       let appInfo: bundleManager.ApplicationInfo = bundleInfo.appInfo;

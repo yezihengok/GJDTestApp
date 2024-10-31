@@ -11,13 +11,13 @@ import { TypeJGQ } from '../data/HomeDataType';
 @Component
 export default struct FunctionBuilder {
   //private dataList:Array<Array<MFunction>>=[];
-  private data: TypeJGQ;
+  private data?: TypeJGQ
   private swiperController: SwiperController = new SwiperController()
   @State color: string = "Color.White";
 
   build() {
     Column() {
-       if (this.data.dataSuccess) {
+       if (this.data?.dataSuccess) {
 
          Swiper(this.swiperController) {
            ForEach(this.data.dataList, (item: Array<MFunction>, index) => {
@@ -29,7 +29,7 @@ export default struct FunctionBuilder {
                    GridItem() {
                      this.mFucItem(data, index)
                    }.width('100%')
-                 }, data => JSON.stringify(data))
+                 }, (data: MFunction) => JSON.stringify(data))
 
                }
                .rowsTemplate('1fr 1fr')

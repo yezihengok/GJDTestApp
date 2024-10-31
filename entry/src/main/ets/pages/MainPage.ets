@@ -12,7 +12,7 @@ import { LoadingDialog } from '../widget/LoadingDialog';
 import emitter from '@ohos.events.emitter';
 import { EventKeys, loadingEvent } from '../common/event/EventKeys';
 import { showLoadingDialog } from '../common/utils/DialogUtils';
-import EventBus from '../common/utils/EventBus';
+
 /**
  * The MainPage that is routed as the SplashScreenPage.
  */
@@ -59,17 +59,28 @@ struct MainPage {
     Headers.dgUid=userId;
     hilog.info(0, "TAG",`组件即将出现时回调:${JSON.stringify(Headers)}`);
 
+
     //接收loadingEvent
-    emitter.on(loadingEvent, (event) => {
-      if (event.data.showLoading == true && !this.loadingShow) {
+    emitter.on(loadingEvent, (event: emitter.EventData): void  => {
+      if (event.data?.showLoading == true && !this.loadingShow) {
         this.loadingShow = true
         this.loadingTips = event.data.loadingTips
         this.loadingDialogController.open()
-      } else if (event.data.showLoading == false) {
+      } else if (event.data?.showLoading == false) {
         this.loadingDialogController.close()
         this.loadingShow = false
       }
+
     })
+
+
+    let eventData: emitter.EventData = {
+      data: {
+        content: 'c',
+        id: 1,
+        isEmpty: false
+      }
+    };
 
   }
 

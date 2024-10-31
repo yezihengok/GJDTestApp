@@ -1,4 +1,5 @@
-import window from '@ohos.window'
+import { window } from "@kit.ArkUI";
+
 
 export default class WindowUtils {
   static statusBarHeight: number = -1

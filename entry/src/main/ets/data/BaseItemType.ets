@@ -2,11 +2,11 @@ import { CommonUtil } from '../common/utils/CommonUtil'
 
 export class BaseItemType {
   name: string = ""
-  isEmpty: boolean //是否数据为空
+  isEmpty: boolean=false //是否数据为空
   hasPermission: boolean //是否有权限
-  data: any
+  data: object|null
 
-  constructor(hasPermission: boolean,data: any) {
+  constructor(hasPermission: boolean,data: object|null) {
     this.data = data
     this.hasPermission = hasPermission
     if (data instanceof Object) {

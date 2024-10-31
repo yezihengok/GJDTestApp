@@ -1,13 +1,15 @@
 
 import router from '@ohos.router';
+import { WebBean } from '../../pages/WebPage';
 import Logger from './Logger';
 export class RouterUtil{
 
-  static toWeb(link?: string){
+  static toWeb(link: string){
+   let web:WebBean=new WebBean('',link)
     router.pushUrl({
       url: 'pages/WebPage',
       params: {
-        url: link
+        url: web.url
       }
     });
   }

@@ -8,6 +8,7 @@ export class HeadersData {
   platform: string = '3001';
   dgUserName: string = '';
   dgUid: string = '';
+  Cookie: string = '';
 }
 
 const Headers:HeadersData=new HeadersData();

@@ -1,7 +1,7 @@
 export class BaseRsp<T> {
   code: number = 0
   msg: string = ""
-  data: T = null
+  data?: T
 
   /**
    * DG的接口返回 200就是成功

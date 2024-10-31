@@ -11,6 +11,7 @@ import { CommonUtil } from '../../common/utils/CommonUtil';
 import { TypeDynamics1, TypeDynamics2 } from '../../data/HomeDataType';
 import { RefreshFooter } from '../../view/RefreshFooter';
 import { NoMoreFooter } from '../../view/NoMoreFooter';
+import { ErrorCode } from '@kit.AbilityKit';
 
 /**
  * 动态
@@ -20,7 +21,7 @@ export struct HomeDynamicsComponent {
   private TAG = "HomeDynamicsComponent"
   private scrollerForList: Scroller = new Scroller();
   private refreshConfig = new PullToRefreshConfigurator();
-  private parentScroller: Scroller
+  private parentScroller?: Scroller
   @State data: Array<Object> = []
   private lastTimestamp: number = 0;
   @State hasMore: boolean = true;
@@ -49,7 +50,7 @@ export struct HomeDynamicsComponent {
       // this.data = data;
       if (data.length === 0) {
         this.loadState = LoadState.EMPTY;
-        this.data = null
+        // this.data = null
       } else {
         this.loadState = LoadState.SUCCESS;
         data.forEach(element => {
@@ -61,7 +62,7 @@ export struct HomeDynamicsComponent {
         });
       }
     },
-      (error) => {
+      (error:Error) => {
         this.loadState = LoadState.FAIL;
       })
   }
@@ -69,8 +70,8 @@ export struct HomeDynamicsComponent {
   private async loadDataByPage(lastTimestamp: number): Promise<Array<MarketNew>> {
     let res = await Api.get().marketNews(lastTimestamp, 10);
     return new Promise<Array<MarketNew>>((resolve, reject) => {
-      if (res.isSuccess()) {
-        let list = res.data;
+      let list = res.data;
+      if (res.isSuccess()&&list!=undefined) {
         resolve(list);
       } else {
         reject();
@@ -107,7 +108,7 @@ export struct HomeDynamicsComponent {
               resolve('没有更多了');
             }
           },
-          (error) => {
+          (error:Error) => {
             resolve('加载失败');
           }
         )
@@ -228,11 +229,11 @@ export struct HomeDynamicsComponent {
 }
 
 
-@Builder function TagTimeLayout(strTag: string, strTime: string) {
+@Builder function TagTimeLayout(strTag?: string, strTime?: string) {
   Row() {
-    Text(strTag).width(56).fontSize(13).fontColor($r('app.color.up_common_brand_color'))
+    Text(strTag ?? '--').width(56).fontSize(13).fontColor($r('app.color.up_common_brand_color'))
     Line().width(1).height(10).backgroundColor('#a6a6a6').margin({ left: 5 })
-    Text(strTime).fontSize(13).fontColor('#9BA5B8').margin({ left: 5 })
+    Text(strTime ?? '--').fontSize(13).fontColor('#9BA5B8').margin({ left: 5 })
   }.margin({ top: 10 }).width('100%')
 }
 
@@ -241,17 +242,18 @@ export struct HomeDynamicsComponent {
  */
 @Component
 struct MarketNewItemBuilder1 {
-  dataBean: TypeDynamics1;
-  onItemClick: (MarketNew) => void;
+  dataBean?: TypeDynamics1;
+  onItemClick: (obj:MarketNew) => void=()=>{
+  };
 
   build() {
     Column() {
-      Text(this.dataBean.marketNew.summary).maxLines(3).fontSize(14)
+      Text(this.dataBean?.marketNew.summary).maxLines(3).fontSize(14)
         .fontColor($r('app.color.up_common_text_primary_color'))
         .textOverflow({ overflow: TextOverflow.Ellipsis })
 
       Flex({ direction: FlexDirection.Row, wrap: FlexWrap.NoWrap }) {
-        if (MarketNew.getPicList(this.dataBean.marketNew).length > 0) {
+        if (this.dataBean!=undefined && MarketNew.getPicList(this.dataBean.marketNew).length > 0) {
           ForEach(MarketNew.getPicList(this.dataBean.marketNew), (item: string, index) => {
             //多个将会平分显示
             if (index > 0) {
@@ -269,14 +271,15 @@ struct MarketNewItemBuilder1 {
                 .objectFit(ImageFit.Cover)
                 .margin({ top: 5 })
             }
-          }, item => JSON.stringify(item))
+          }, (item: string) => JSON.stringify(item))
         }
       }
 
-      TagTimeLayout(this.dataBean.marketNew.secondCategoryName, this.dataBean.marketNew.publishTime)
-    }.height(MarketNew.getPicList(this.dataBean.marketNew).length > 0 ? 180 : 110)
+      TagTimeLayout(this.dataBean?.marketNew.secondCategoryName, this.dataBean?.marketNew.publishTime)
+    }.height(MarketNew.getPicList(this.dataBean?.marketNew).length > 0 ? 180 : 110)
     .justifyContent(FlexAlign.Center)
     .onClick(() => {
+      if(this.dataBean!=undefined)
       this.onItemClick(this.dataBean.marketNew);
     })
 
@@ -288,40 +291,41 @@ struct MarketNewItemBuilder1 {
  */
 @Component
 struct MarketNewItemBuilder2 {
-  dataBean: TypeDynamics2;
-  onItemClick: (MarketNew) => void;
+  dataBean?: TypeDynamics2;
+  onItemClick: (obj:MarketNew) => void= ()=>{};
 
   build() {
     Row() {
       Column() {
-        Text(this.dataBean.marketNew.title)
+        Text(this.dataBean?.marketNew.title)
           .width('100%')
           .fontSize(15)
           .fontWeight(FontWeight.Bold)
           .maxLines(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-        Text(this.dataBean.marketNew.summary)
+        Text(this.dataBean?.marketNew.summary)
           .fontSize(13)
           .width('100%')
           .fontColor('#657180')
           .maxLines(2)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .margin({ top: 5 })
-        TagTimeLayout(this.dataBean.marketNew.secondCategoryName, this.dataBean.marketNew.publishTime)
+        TagTimeLayout(this.dataBean?.marketNew.secondCategoryName, this.dataBean?.marketNew.publishTime)
       }
       .layoutWeight(1)
 
-      Image(this.dataBean.marketNew.coverImage)
+      Image(this.dataBean?.marketNew.coverImage)
         .width(100)
         .height(70)
         .margin({ top: 15, bottom: 15, left: 5 })
         .objectFit(ImageFit.Cover)
         .id('coverImg')
         .borderRadius(5)
-        .visibility(CommonUtil.isEmpty(this.dataBean.marketNew.coverImage) ? Visibility.None : Visibility.Visible)
+        .visibility(CommonUtil.isEmpty(this.dataBean?.marketNew.coverImage) ? Visibility.None : Visibility.Visible)
 
     }.padding({ top: 10, bottom: 10 })
     .width('100%').height(110).onClick(() => {
+      if(this.dataBean!=undefined)
       this.onItemClick(this.dataBean.marketNew);
     })
   }

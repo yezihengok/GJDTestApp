@@ -3,22 +3,22 @@ export class FunctionData {
 
   code: string = '';
   name: string = '';
-  secondNavbars:Array<MFunction>;
+  secondNavbars:Array<MFunction>=[];
 }
 
 export class MFunction{
-  functionId: number;
+  functionId: number=0;
   code: string = '';
-  categoryId: number;
+  categoryId: number=0;
   categoryName: string = '';
   icon: string = '';
   subscript: string = '';
   link: string = '';
-  permissions:string[];
-  jumpType: number;
+  permissions:string[]=[];
+  jumpType: number=0;
   adLink: string = '';
   title: string = '';
-  loginType: number;
+  loginType: number=0;
 
 }
 

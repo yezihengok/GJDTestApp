@@ -10,9 +10,9 @@ export class DateUtil {
    * @returns
    */
   static dateToStamp(dateStr: string): number {
-    var date = new Date(dateStr); //时间对象
+    let date = new Date(dateStr); //时间对象
     // var timestamp2 = Date.parse(date.toString());
-    var time = date.getTime();
+    let time = date.getTime();
     return (date != null || date!=undefined) ? time : 0;
   }
 }

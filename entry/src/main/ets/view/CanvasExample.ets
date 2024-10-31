@@ -1,13 +1,14 @@
 
 import hilog from '@ohos.hilog'
 import { CommonUtil } from '../common/utils/CommonUtil'
+import { promptAction } from '@kit.ArkUI';
 
 @Entry
 @Component
 struct CanvasExample {
 
   //模拟接口返回的测试数据
-  private   testData={
+  private testData:TestResponse={
     "code": 200,
     "data": [{
       "index": 0,
@@ -316,22 +317,23 @@ struct CanvasExample {
   @State mDataList: Array<MyData> = []
   @State  mSideMax:number = 0;
 
+  @State isChecked:boolean=false
   aboutToAppear() {
-    // this.mDataList = this.testData.data
+     this.mDataList = this.testData.data
 
     setInterval(() => {
+      if(!this.isChecked)return
       let randomIndex=CommonUtil.getRandom(0,100)
       let randomPrice=CommonUtil.getRandom(20,100)
-
       hilog.error(0,"",`randomIndex=${randomIndex} randomPrice=${randomPrice}`)
-      // this.mSideMax=randomIndex
-      if(this.mDataList.length<this.testData.data.length){
-        this.mDataList.push(this.testData.data[this.mDataList.length])
-
-        hilog.error(0,"",`mDataList=${this.mDataList.length}`)
-      }else{
-        clearInterval(0x123)
-      }
+      this.mSideMax=randomIndex
+      // if(this.mDataList.length<this.testData?.data.length){
+      //   this.mDataList.push(this.testData.data[this.mDataList.length])
+      //   hilog.error(0,"",`mDataList=${this.mDataList.length}`)
+      // }else{
+      //   clearInterval(0x123)
+      // }
+      CommonUtil.arrIndexExchange(this.mDataList,CommonUtil.getRandom(10,90),CommonUtil.getRandom(20,80))
       this.stateNum++;//改变数字为了触发刷新
     }, 1000,0x123);
 
@@ -353,6 +355,17 @@ struct CanvasExample {
           console.info('value:' + value + 'mode:' + mode.toString())
           // this.mDataList[5].price=value
         })
+
+      Row(){
+        Toggle({ type: ToggleType.Switch, isOn: false })
+          .onChange((isOn: boolean) => {
+            this.isChecked=isOn;
+            if(isOn) {
+              promptAction.showToast({ message: '已开启随机' })
+            }
+          })
+        Text('开启随机').padding({top:10,bottom:10})
+      }
     }
     .width('100%')
     .height('100%')
@@ -360,16 +373,20 @@ struct CanvasExample {
 }
 
 
-
+class TestResponse{
+  data:Array<MyData>=[]
+  code?:number
+  msg:string=''
+}
 
  class MyData {
-  index:number
-  price:number
+  index:number=0
+  price:number=0
 }
 
  class Point {
-  x: number
-  y: number
+  x?: number
+  y?: number
 
   constructor(x?: number , y?: number ) {
     this.x = x
@@ -405,7 +422,7 @@ export struct LinePathView {
 
   //选择的起止
   @Prop mSideMin:number ;
-  @Prop @Watch('invalidate') mSideMax:number;
+  @Prop @Watch('invalidate') mSideMax:number=0;
 
   @State  mSideMinIndex:number = 20;
   @State  mSideMaxIndex:number = 60;
@@ -417,18 +434,19 @@ export struct LinePathView {
     let drawerHeight = this.context.height;
 
     this.drawBorder(drawerWidth,drawerHeight)
-    this.drawNowPriceLine(drawerWidth,drawerHeight)
-    this.drawSelectPath(drawerWidth,drawerHeight)
+    if(CommonUtil.isListNotNull(this.mDataList)) {
+      this.drawNowPriceLine(drawerWidth,drawerHeight)
+      this.drawSelectPath(drawerWidth,drawerHeight)
+    }
   }
 
 
   invalidate(){
     this.mSideMinIndex=this.mSideMin
     this.mSideMaxIndex=Number(this.mSideMax.toFixed(0))
-
     hilog.error(0,"",`invalidate=============》`)
-
-    //不能执行绘制，这样会重复叠加绘制一遍，需要清空画布后执行。暂时网上也找不到清空画布的api
+/*
+    //api 11 之前时代 不能执行绘制，这样会重复叠加绘制一遍，需要清空画布后执行。暂时网上也找不到清空画布的api
     // this.onDraw()
 
     //临时曲线救国方式: Canvas组件发生大小变化时会回调onReady，同时画布被清空
@@ -436,8 +454,11 @@ export struct LinePathView {
       this.canvasHeight-=0.01
     }else{
       this.canvasHeight+=0.01
-    }
+    }*/
 
+    // 新api 已支持清空画布，防止图表堆叠
+    this.context.clearRect(0, 0, this.context.width, this.context.height);
+    this.onDraw()
   }
   aboutToAppear() {
     // this.mDataList = LinePathView.testData.data
@@ -465,13 +486,13 @@ export struct LinePathView {
     this.context.strokeRect(0, 0, drawerWidth, drawerHeight)
 
     this.context.lineWidth = 1
-    this.context.setLineDash([10, 20])
+    this.context.setLineDash([10, 8])
     //画2条横线
     this.context.fillStyle = this.borderColors
     let offsetY = drawerHeight / this.Y_NUM
     let startY = offsetY
     this.context.beginPath();
-    for (var i = 1; i < this.Y_NUM; i++) {
+    for (let i = 1; i < this.Y_NUM; i++) {
       this.context.moveTo(0, startY);
       this.context.lineTo(drawerWidth, startY);
       startY += offsetY;
@@ -482,7 +503,7 @@ export struct LinePathView {
     let offsetX = drawerWidth / this.X_NUM
     let startX = offsetX
     this.context.beginPath();
-    for (var i = 1; i < this.X_NUM; i++) {
+    for (let i = 1; i < this.X_NUM; i++) {
       this.context.moveTo(startX, 0);
       this.context.lineTo(startX, drawerHeight);
       startX += offsetX;
@@ -493,6 +514,7 @@ export struct LinePathView {
   }
 
   drawNowPriceLine(drawerWidth: number, drawerHeight: number) {
+    hilog.error(0,"",`drawNowPriceLine=============》`)
     this.context.save()
     this.context.lineWidth = 1
     this.context.fillStyle = this.priceColors
@@ -509,6 +531,7 @@ export struct LinePathView {
     let shaderPath = new Path2D();//现价非闭合路径path
     for (let i = 0; i < size; i++) {
       const data = this.mDataList[i]
+      if(data==undefined) break
       let y = (this.mMaxValue - data.price) * unitHeight
       minY = Math.min(minY, y)
       //画现价线条
@@ -537,7 +560,7 @@ export struct LinePathView {
     this.context.stroke();
 
     //渐变样式填充
-    var grad = this.context.createLinearGradient(drawerWidth/2,0, drawerWidth/2,drawerHeight)
+    let grad = this.context.createLinearGradient(drawerWidth/2,0, drawerWidth/2,drawerHeight)
     grad.addColorStop(0.0, '#B8B8B8')
     grad.addColorStop(1.0, '#1AB8B8B8')
     this.context.fillStyle = grad
@@ -587,7 +610,7 @@ export struct LinePathView {
     this.context.stroke();
 
     //渐变样式填充
-    var grad = this.context.createLinearGradient(drawerWidth/2,0, drawerWidth/2,drawerHeight)
+    let grad = this.context.createLinearGradient(drawerWidth/2,0, drawerWidth/2,drawerHeight)
     grad.addColorStop(0.0, '#990097D4')
     grad.addColorStop(1.0, '#1a0097D4')
     this.context.fillStyle = grad
@@ -598,6 +621,7 @@ export struct LinePathView {
 
   build() {
     Column() {
+
       Text(`select区间: ${this.mSideMinIndex}-${this.mSideMaxIndex}`)
       Row(){
         Canvas(this.context)
@@ -606,6 +630,7 @@ export struct LinePathView {
             // .backgroundColor('#dcdcdc')
           .onReady(this.onDraw)
       }.width('90%').height(this.canvasHeight)
+
     }.width('100%').padding({top:10})
   }
 

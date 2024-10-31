@@ -42,7 +42,7 @@ export struct RecommendComponent {
 
         }
       },
-      (error) => {
+      (error:Error) => {
         this.loadState = LoadState.FAIL;
       })
   }
@@ -57,13 +57,13 @@ export struct RecommendComponent {
 
       if (lastTimestamp === 0) {
         let recRsp = await Api.get().getRecommendCircle(3);
-        if (recRsp.isSuccess()) {
+        if (recRsp.isSuccess()&&recRsp.data!=undefined) {
           this.circleInfoList = recRsp.data;
           this.data[0] = new TypeDQRecommend(recRsp.data)
         }
 
         let circleRsp = await Api.get().getCircleTrends(lastTimestamp, 10);
-        if (circleRsp.isSuccess()) {
+        if (circleRsp.isSuccess()&&circleRsp.data!=undefined) {
           this.data[1] = new TypeDQDT(circleRsp.data)
         }
         resolve(this.data);
@@ -71,7 +71,7 @@ export struct RecommendComponent {
       } else {
         let circleRsp = await Api.get().getCircleTrends(lastTimestamp, 10);
 
-        if (circleRsp.isSuccess() && this.data[1] instanceof TypeDQDT) {
+        if (circleRsp.isSuccess() &&circleRsp.data!=undefined && this.data[1] instanceof TypeDQDT) {
           let list = this.data[1] as TypeDQDT
           list.dataList.concat(circleRsp.data)
         }
@@ -112,7 +112,7 @@ export struct RecommendComponent {
                         resolve('没有更多了');
                       }
                     },
-                    (error) => {
+                    (error:Error) => {
                       resolve('加载失败');
                     }
                   )
@@ -159,7 +159,7 @@ export struct RecommendComponent {
  */
 @Component
 struct DQRecommend {
-   data:TypeDQRecommend
+   data?:TypeDQRecommend
   private marginLeft: number = 8
   @State dataList: Array<CircleInfo> = [];
 /*  @State dataList: Array<CircleInfo> = [
@@ -213,35 +213,40 @@ struct DQRecommend {
 
 @Component
 struct DQItem {
-  marginLeft: number
-  info: CircleInfo
-  clickFollow: (CircleInfo) => void;
+  marginLeft: number=0
+  info?: CircleInfo
+  // clickFollow: (info?:CircleInfo) => void;
+  //sdk 5.0最新语法-方法默认也要初始化
+  clickFollow: (info:CircleInfo) => void=() =>{
 
+  };
   build() {
 
     Column() {
       Stack() {
-        Image(this.info.circleAvatar).width('30vp').height('30vp').borderRadius(25)
+        Image(this.info?.circleAvatar).width('30vp').height('30vp').borderRadius(25)
         Image($r('app.media.top_circle_article_avatar_living_icon'))
           .width('16vp').height('16vp')
           .margin({ right: -5, top: -5 })
-          .visibility(this.info.liveStatus === 1 ? Visibility.Visible : Visibility.Hidden)
+          .visibility(this.info?.liveStatus === 1 ? Visibility.Visible : Visibility.Hidden)
       }.alignContent(Alignment.TopEnd)
 
-      Text(this.info.circleName).fontSize(13)
+      Text(this.info?.circleName).fontSize(13)
         .fontColor($r('app.color.up_common_text_title_color'))
         .margin({ top: 4 })
-      Text(`粉丝数 ${this.info.followCount}`)
+      Text(`粉丝数 ${this.info?.followCount}`)
         .fontSize(11).fontColor('#8B8B8B').margin({ top: 3 })
-      Text(this.info.followFlag ? '已关注' : '关注')
+      Text(this.info?.followFlag ? '已关注' : '关注')
         .fontSize(11)
         .margin({ top: 3 })
         .borderRadius(15)
         .padding({ left: 12, right: 12, top: 4, bottom: 4 })
-        .fontColor(this.info.followFlag ? '#838383' : '#F54949')
-        .backgroundColor(this.info.followFlag ? '#f0f0f0' : '#fff4f4')
+        .fontColor(this.info?.followFlag ? '#838383' : '#F54949')
+        .backgroundColor(this.info?.followFlag ? '#f0f0f0' : '#fff4f4')
         .onClick(() => {
-          this.clickFollow(this.info)
+          if(this.info){
+            this.clickFollow(this.info)
+          }
         })
 
     }

@@ -20,10 +20,10 @@ import { H5Address } from '../../common/constants/H5Address';
 export struct HomeStrategyComponent {
   @State loadState: LoadState = LoadState.LOADING;
   @State showLoading: boolean = false;
-  hashMap = new HashMap();
+  hashMap:HashMap<string,string> = new HashMap();
   private TAG = "IndexDynamicsComponent"
   @State data: Array<BaseItemType> = []
-  @State strategy: StrategyTools = null;
+  @State strategy: StrategyTools=new StrategyTools()
   private scrollerForList: Scroller = new Scroller()
   private parentScroller: Scroller = new Scroller()
   @State listPosition: number = 0; // 0代表滚动到List顶部，1代表中间值，2代表滚动到List底部
@@ -39,10 +39,10 @@ export struct HomeStrategyComponent {
     //获取功能区(有返回则有权限)
     let fucRsp = await Api.get().getFunctionData('gjd_sy_cl_pc');
     let strategyRsp = await Api.get().getStrategyTools();
-    this.strategy = strategyRsp.data;
+    this.strategy = strategyRsp.data as StrategyTools;
     // this.loadState = LoadState.FAIL;
 
-    if (fucRsp.isSuccess() && strategyRsp.isSuccess() && fucRsp.data.length > 0) {
+    if (fucRsp.isSuccess() &&fucRsp.data!= undefined  && strategyRsp.isSuccess() && fucRsp.data?.length > 0) {
       fucRsp.data[0].secondNavbars.forEach(element => {
         this.hashMap.set(element.code, element.categoryName)
       });
@@ -97,7 +97,7 @@ export struct HomeStrategyComponent {
               } else if (item instanceof BXPools) {
                 BXItem({ bean: item })
               } else if (item instanceof CDXH) {
-                CDXHItem({ bean: item, onCallBack: () => this.loadData(false) })
+                CDXHItem({ bean: item, onCallBack: (): Promise<void> => this.loadData(false) })
               } else if (item instanceof LTQB) {
                 LTQBItem({ bean: item })
               } else if (item instanceof QSLT) {
@@ -141,14 +141,14 @@ export struct HomeStrategyComponent {
 
 @Component
 struct NSItem {
-  @State bean: NSPools = null
+  @State bean: NSPools|null=null
   @State emptyType: UPEmptyType = UPEmptyType.UPEmptyTypeData
   onCallBack?: () => void;
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => RouterUtil.toWeb(H5Address.HOME_NSDR_URL))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -162,7 +162,7 @@ struct NSItem {
         Text('季度收益率').fontSize(13).fontColor($r('app.color.up_common_text_secondary_color')).width('20%');
       }
 
-      if (CommonUtil.isListNotNull(this.bean.data)) {
+      if (CommonUtil.isListNotNull(this.bean?.data)) {
         Text('列表数据不为空,UI待完成').fontSize(16)
       } else {
         EmptyView({
@@ -184,12 +184,12 @@ struct NSItem {
 
 @Component
 struct BXItem {
-  bean: BXPools
+  bean?: BXPools
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => RouterUtil.toWeb(H5Address.HOME_BXJJ_MORE_URL))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -199,32 +199,32 @@ struct BXItem {
       Grid() {
         GridItem() {
           this.bXCardItem({
-            title: `增仓精选池${CommonUtil.getDefaultNumber(this.bean.data.increasePosition)}只`,
-            date: this.bean.data.updatedAd,
+            title: `增仓精选池${CommonUtil.getDefaultNumber(this.bean?.data.increasePosition ?? 0)}只`,
+            date: this.bean?.data.updatedAd ?? '',
             content: '北向资金又有哪些持了'
           })
         }
 
         GridItem() {
           this.bXCardItem({
-            title: `抄底精选池${CommonUtil.getDefaultNumber(this.bean.data.copyBottom)}只`,
-            date: this.bean.data.updatedAd,
+            title: `抄底精选池${CommonUtil.getDefaultNumber(this.bean?.data.copyBottom ?? 0)}只`,
+            date: this.bean?.data.updatedAd ?? '',
             content: '哪个股票被北向抄了底？'
           })
         }
 
         GridItem() {
           this.bXCardItem({
-            title: `共振精选池${CommonUtil.getDefaultNumber(this.bean.data.resonance)}只`,
-            date: this.bean.data.updatedAd,
+            title: `共振精选池${CommonUtil.getDefaultNumber(this.bean?.data.resonance ?? 0)}只`,
+            date: this.bean?.data.updatedAd ?? '',
             content: '主力持仓在买的股票'
           })
         }
 
         GridItem() {
           this.bXCardItem({
-            title: `建仓精选池${CommonUtil.getDefaultNumber(this.bean.data.openPosition)}只`,
-            date: this.bean.data.updatedAd,
+            title: `建仓精选池${CommonUtil.getDefaultNumber(this.bean?.data.openPosition?? 0)}只`,
+            date: this.bean?.data.updatedAd ??'',
             content: '北向资金最近买了啥？'
           })
         }
@@ -250,11 +250,7 @@ struct BXItem {
     .shadow({ radius: $r('app.float.vp_four'), color: '#dcdcdc', offsetX: 1, offsetY: 1 })
   }
 
-  @Builder bXCardItem($$: {
-    title: string,
-    date: string,
-    content: string
-  }) {
+  @Builder bXCardItem($$: CardItemObj) {
     //外面套一层设置padding 为了让shadow显示完整
     Stack() {
       Column() {
@@ -274,14 +270,14 @@ struct BXItem {
 
 @Component
 struct CDXHItem {
-  bean: CDXH
+  bean?: CDXH
   @State emptyType: UPEmptyType = UPEmptyType.UPEmptyTypeData
   onCallBack?: () => void;
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => toast('暂无内容'))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -295,7 +291,7 @@ struct CDXHItem {
         Text('信号').fontSize(13).fontColor($r('app.color.up_common_text_secondary_color')).width('20%');
       }
 
-      if (CommonUtil.isListNotNull(this.bean.data)) {
+      if (this.bean?.data!= undefined ) {
         Text('列表数据不为空,UI待完成').fontSize(16)
       } else {
         EmptyView({
@@ -317,12 +313,12 @@ struct CDXHItem {
 
 @Component
 struct LTQBItem {
-  bean: LTQB
+  bean?: LTQB
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => toast('暂无内容'))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -335,12 +331,12 @@ struct LTQBItem {
 
 @Component
 struct QSLTItem {
-  bean: QSLT
+  bean?: QSLT
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => toast('暂无内容'))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -352,12 +348,12 @@ struct QSLTItem {
 
 @Component
 struct YZDGItem {
-  bean: ZYDGPools
+  bean?: ZYDGPools
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => RouterUtil.toWeb(H5Address.STOCK_POOL_STRATEGY_ZYDG))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
@@ -365,9 +361,9 @@ struct YZDGItem {
       }.width('100%').margin({ top: 15, bottom: 10 })
       //if(CommonUtil.isListNotNull(this.bean.data)){
         Flex({ direction: FlexDirection.Row }) {
-          ChildItem({ strategyPool: this.bean.data[0], icon: $r('app.media.icon_lt_mx_first') })
-          ChildItem({ strategyPool: this.bean.data[1], icon: $r('app.media.icon_lt_mx_second'),marginLeft:8 })
-          ChildItem({ strategyPool: this.bean.data[2], icon: $r('app.media.icon_lt_mx_third'),marginLeft:8  })
+          ChildItem({ strategyPool: this.bean?.data[0], icon: $r('app.media.icon_lt_mx_first') })
+          ChildItem({ strategyPool: this.bean?.data[1], icon: $r('app.media.icon_lt_mx_second'),marginLeft:8 })
+          ChildItem({ strategyPool: this.bean?.data[2], icon: $r('app.media.icon_lt_mx_third'),marginLeft:8  })
         }
      // }
 
@@ -377,13 +373,13 @@ struct YZDGItem {
 
 @Component
 struct ChildItem {
-  @State strategyPool: StrategyPool = null
-  icon: Resource
-  marginLeft: number
+  @State strategyPool: StrategyPool|null = null
+  icon?: Resource
+  marginLeft: number=0
   build() {
     RelativeContainer() {
 
-      Image(this.icon)
+      Image(this?.icon)
         .objectFit(ImageFit.Auto)
         .width(18.5)
         .height(20)
@@ -440,22 +436,28 @@ struct ChildItem {
 
 @Component
 struct PEGItem {
-  bean: PEGPools
+  bean?: PEGPools
 
   build() {
     Column() {
       Row() {
-        Text(this.bean.name).fontWeight(FontWeight.Bold).fontSize(18)
+        Text(this.bean?.name).fontWeight(FontWeight.Bold).fontSize(18)
         Blank()
         Text('更多').fontSize(14).onClick(() => RouterUtil.toWeb(H5Address.STOCK_POOL_STRATEGY_PEG))
         Image($r('app.media.home_today_kanban_more_arrow')).objectFit(ImageFit.ScaleDown)
           .height(14).width(7).margin({ left: 5 })
       }.width('100%').margin({ top: 15, bottom: 10 })
       Flex({ direction: FlexDirection.Row }) {
-        ChildItem({ strategyPool: this.bean.data[0], icon: $r('app.media.icon_lt_mx_first') })
-        ChildItem({ strategyPool: this.bean.data[1], icon: $r('app.media.icon_lt_mx_second'),marginLeft:8 })
-        ChildItem({ strategyPool: this.bean.data[2], icon: $r('app.media.icon_lt_mx_third'),marginLeft:8  })
+        ChildItem({ strategyPool: this.bean?.data[0], icon: $r('app.media.icon_lt_mx_first') })
+        ChildItem({ strategyPool: this.bean?.data[1], icon: $r('app.media.icon_lt_mx_second'),marginLeft:8 })
+        ChildItem({ strategyPool: this.bean?.data[2], icon: $r('app.media.icon_lt_mx_third'),marginLeft:8  })
       }
     }
   }
+}
+
+class CardItemObj{
+  title: string=''
+  date: string=''
+  content: string=''
 }

@@ -1,13 +1,13 @@
 import { CommonUtil } from '../../utils/CommonUtil'
 export class StrategyTools{
-  nsPools:Array<NiuSanJHBData>
-  bxPools:BXJJData=null
-  zydgPools:Array<StrategyPool>
-  pegPools:Array<StrategyPool>
+  nsPools:Array<NiuSanJHBData>=[]
+  bxPools:BXJJData=new BXJJData()
+  zydgPools:Array<StrategyPool>=[]
+  pegPools:Array<StrategyPool>=[]
 
   static  isEmpty(bean:StrategyTools ){
     return CommonUtil.isListNull(bean.nsPools)
-    &&bean.bxPools===null
+    &&bean.bxPools===undefined
     &&CommonUtil.isListNull(bean.zydgPools)
     &&CommonUtil.isListNull(bean.pegPools);
   }
@@ -17,7 +17,7 @@ export class StrategyTools{
 export class NiuSanJHBData {
   innerCode: string = ""; // 股票 603178.sh
   holderName: string = ""; // 牛散
-  marketValue: number; //公开股票资产
+  marketValue: number=0; //公开股票资产
   zjRatio: number=0;
   stockCode: string = "";
   stockName: string = "";

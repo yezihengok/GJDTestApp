@@ -8,7 +8,7 @@ import { TypeBanner } from '../data/HomeDataType';
 @Component
 export default struct BannerBuilder {
   // @Link dataList:Array<BannerData>
-  data: TypeBanner
+    data?: TypeBanner;
   private swiperController: SwiperController = new SwiperController()
   @State interval: number = 3000
   @State private bannerPosition: number = 0
@@ -16,7 +16,7 @@ export default struct BannerBuilder {
   build() {
 
     Column() {
-      if (this.data.dataSuccess) {
+      if (this.data?.dataSuccess) {
         Swiper(this.swiperController) {
           ForEach(this.data.dataList, (item: BannerData, index) => {
 

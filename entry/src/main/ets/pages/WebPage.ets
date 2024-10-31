@@ -2,12 +2,22 @@ import web_webview from '@ohos.web.webview';
 import router from '@ohos.router';
 import { TitleLayout } from '../widget/TitleLayout';
 
+export class WebBean{
+  title:string =''
+  url:string=''
+
+  constructor(title:string,url:string) {
+    this.title=title
+    this.url=url
+  }
+}
 
 @Entry
 @Component
 export struct WebPage {
   private webController: web_webview.WebviewController = new web_webview.WebviewController()
-  private url: string = router.getParams()['url']
+  private params= router.getParams() as WebBean
+  private url: string = this.params.url
 
   @State title: string = "加载中…"
   @State progress: number = 0
@@ -31,7 +41,9 @@ export struct WebPage {
       Stack({ alignContent: Alignment.Top }) {
         Web({
           src: this.url,
-          controller: this.webController
+          controller: this.webController,
+          renderMode: RenderMode.SYNC_RENDER // 设置为同步渲染模式
+
         })
           .width('100%')
           .height('100%')
@@ -40,11 +52,12 @@ export struct WebPage {
           .domStorageAccess(true)
           .databaseAccess(true)
           .mixedMode(MixedMode.All)
-          .onTitleReceive(({title}) => {
-            this.title = title
+
+          .onTitleReceive((event) => {
+            this.title = event.title
           })
-          .onProgressChange(({newProgress}) => {
-            this.progress = newProgress
+          .onProgressChange((event) => {
+            this.progress = event.newProgress
           })
         if (this.progress != 100) {
           Progress({ value: this.progress, total: 100, type: ProgressType.Linear })

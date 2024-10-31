@@ -14,6 +14,8 @@ import { IndexMainTab } from './index/IndexMainTab';
 import { TypeBanner, TypeIndexTab, TypeJGQ, TypeJRKB, TypeSCJJ } from '../data/HomeDataType';
 import { hideLoadingDialog, showLoadingDialog } from '../common/utils/DialogUtils';
 import WindowUtils from '../common/utils/WindowUtils';
+import { BaseBean } from '../common/net/model/BaseBean';
+import { router } from '@kit.ArkUI';
 
 
 // It's not a recommended way to export struct with @Entry decorator
@@ -45,7 +47,7 @@ export struct HomeComponent {
       //获取功能区
       let fucRsp = await Api.get().getFunctionData('gjd_sy_jgq');
       let data = fucRsp.data;
-      if (fucRsp.isSuccess()) {
+      if (fucRsp.isSuccess() && data!=undefined) {
         //处理数据 10个分一组，最多分2组
         this.functions = new Array<Array<MFunction>>();
 
@@ -53,7 +55,7 @@ export struct HomeComponent {
           this.functionList = data[0].secondNavbars; //code 只穿一个列表只会返回1个
           //如果功能超过10个就把更多换到第10个
           if (this.functionList.length > 10) {
-            for (var i = 0; i <= this.functionList.length; i++) {
+            for (let i = 0; i <= this.functionList.length; i++) {
               if (this.functionList[i].link == Config.HOME_ICON_NAVIGATION) {
                 CommonUtil.arrIndexExchange(this.functionList, i, 9);
                 break;
@@ -69,7 +71,7 @@ export struct HomeComponent {
       }
       //获取banner
       let bannerRsp = await Api.get().getBanner('gjd_sy_banner');
-      if (bannerRsp.isSuccess()) {
+      if (bannerRsp.isSuccess() &&bannerRsp.data!=undefined) {
         this.bannerList = bannerRsp.data;
         this.bannerSuccess = this.bannerList.length > 0
       }
@@ -78,9 +80,9 @@ export struct HomeComponent {
       let req: ContentListReq = {
         categoryIdList: [818, 819, 820, 821, 911],
         pageSize: 10
-      };
+      }
       let rsp = await Api.get().queryContentList(req);
-      if (rsp.isSuccess()) {
+      if (rsp.isSuccess()&&rsp.data!=undefined) {
         this.SCJJList = rsp.data;
         this.showSCJJSwiper = rsp.data.length > 0
 
@@ -209,8 +211,8 @@ export struct HomeComponent {
               .height($r('app.float.vp_twenty_four'))
               .margin({ left: $r('app.float.vp_twenty') }).onClick(() => {
               // this.bannerSuccess=true
-              this.refreshData()
-
+             // this.refreshData()
+              router.pushUrl({ url: 'view/CanvasExample' })
             })
 
           }.margin({ top: 5, bottom: 10 })
@@ -360,7 +362,7 @@ struct KanBoard {
 @Component
 struct SCJJSwiper {
   // @Link dataList: Array<ContentArticle>;
-  data: TypeSCJJ
+  data?: TypeSCJJ
 
   getContent(bean: ContentArticle) {
     return CommonUtil.isEmpty(bean.title) ? bean.summary : bean.title;
@@ -370,7 +372,7 @@ struct SCJJSwiper {
     Row() {
       Image($r('app.media.home_market_juejing_icon')).objectFit(ImageFit.Contain)
         .height(30).width(43)
-      if (this.data.dataSuccess) {
+      if (this.data?.dataSuccess) {
         Swiper() {
           ForEach(this.data.dataList, (item: ContentArticle) => {
             Row() {

@@ -1,3 +1,5 @@
+import emitter from "@ohos.events.emitter";
+
 /**
  * 事件的EventNum
  */
@@ -11,6 +13,8 @@ export class EventKeys {
 /**
  * 对应的事件
  */
-export const loadingEvent = {
+
+
+export const loadingEvent: emitter.InnerEvent = {
   eventId: EventKeys.LOADING_DIALOG_EVENT
 }

@@ -1,12 +1,12 @@
 
 export class BannerData {
-  materialId: number;
-  interval: number;
+  materialId: number=0;
+  interval: number=0;
   materialCode: string = '';
   materialName: string = '';
-  materialType: number;
+  materialType: number=0;
   materialText: string = '';
   materialImg: string = '';
-  linkType: number;
+  linkType: number=0;
   linkUrl: string = '';
 }
